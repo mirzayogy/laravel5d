@@ -1,58 +1,117 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Habitude — Habit Tracker
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Habitude is a habit tracking web application built with **Laravel**, **Blade**, and **Tailwind CSS**. It is the final semester project for the *Object-Oriented Programming 2 (PBO2)* course, with a focus on designing and implementing **database table relationships** using Eloquent ORM.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Track daily habits grouped into eight life categories:
+  Health & Fitness, Mindfulness, Productivity, Better Sleep, Stay Hydrated, Read More, Social Connections, and Self Care
+- Daily progress logging with a numeric value and optional note
+- **Mood check-in** for each day (1–5 scale)
+- **Daily journal** that can be linked to the day's mood
+- Habit reminders with custom time and weekdays
+- Tags for flexible habit organization
+- Achievements and badges (for example, a 7-day streak)
+- Dashboard with today's habits, streaks, and per-category progress
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Database Design
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+The full schema and every relationship are documented with Mermaid diagrams in
+[`docs/database/erd.md`](docs/database/erd.md).
 
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```mermaid
+erDiagram
+    USERS ||--o| PROFILES : "has one"
+    USERS ||--o{ HABITS : owns
+    USERS ||--o{ MOOD_ENTRIES : records
+    USERS ||--o{ JOURNAL_ENTRIES : writes
+    USERS }o--o{ ACHIEVEMENTS : earns
+    CATEGORIES ||--o{ HABITS : groups
+    HABITS ||--o{ HABIT_LOGS : has
+    HABITS ||--o{ REMINDERS : has
+    HABITS }o--o{ TAGS : "tagged with"
+    MOOD_ENTRIES ||--o| JOURNAL_ENTRIES : "may have"
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### Relationships Covered
 
-## Contributing
+| Type | Example |
+|---|---|
+| One-to-One | `User` ↔ `Profile`, `MoodEntry` ↔ `JournalEntry` |
+| One-to-Many | `User` → `Habit`, `Category` → `Habit`, `Habit` → `HabitLog` |
+| Many-to-Many | `Habit` ↔ `Tag` |
+| Many-to-Many with pivot data | `User` ↔ `Achievement` (`earned_at`) |
+| Has-Many-Through | `User` → `HabitLog` through `Habit` |
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Tech Stack
 
-## Code of Conduct
+- PHP 8.3+ and Laravel
+- Blade templates
+- Tailwind CSS (via Vite)
+- MySQL or SQLite
+- Laravel MCP for AI-assisted development
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Getting Started
 
-## Security Vulnerabilities
+```bash
+# Clone the repository
+git clone https://github.com/dzakwannajmi/PBO2_LARAVEL_5C.git
+cd PBO2_LARAVEL_5C
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# Install dependencies
+composer install
+npm install
+
+# Configure the environment
+cp .env.example .env
+php artisan key:generate
+
+# Create the schema and seed the categories
+php artisan migrate --seed
+
+# Start the development servers
+npm run dev
+php artisan serve
+```
+
+Then open <http://localhost:8000>.
+
+## Progress
+
+Phase progress (P01, ...) broken into jobs (J1, J2, ...) with proof, status, and completion dates: [`docs/progress`](docs/progress/P01-database-design.md).
+
+## Contributing / Forking
+
+New to forking the course repository? See the step-by-step guide for Windows and macOS (in Indonesian): [`docs/guides/fork-guide.md`](docs/guides/fork-guide.md).
+
+## Project Structure
+
+```
+app/Models/        Eloquent models and relationships
+database/
+  migrations/      Table definitions
+  factories/       Fake data generators
+  seeders/         Categories and sample data
+resources/views/   Blade templates
+docs/
+  database/        ERD and relationship documentation
+  guides/          Fork and Git workflow guide
+  progress/        Phase tracker (P01, ...)
+```
+
+## Roadmap
+
+- [x] Database design and documentation
+- [x] Migrations, models, factories, and seeders
+- [ ] Authentication
+- [ ] Habit, mood, and journal CRUD
+- [ ] Dashboard with streaks and category progress
+- [ ] Reminders and achievements
+
+## Author
+
+Muhammad Dzakwan Najmi — NPM 2410010454 — TI 5C REG BJB
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Released under the [MIT License](https://opensource.org/licenses/MIT).
