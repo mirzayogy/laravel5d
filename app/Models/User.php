@@ -9,8 +9,11 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
-#[Fillable(['name', 'email', 'password'])]
+#[Fillable(['name', 'email', 'password', 'role'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -29,4 +32,36 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+      public function profile(): HasOne
+  {
+      return $this->hasOne(Profile::class);
+  }
+
+  public function addresses(): HasMany
+  {
+      return $this->hasMany(Address::class);
+  }
+
+  // sebagai seller
+  public function products(): HasMany
+  {
+      return $this->hasMany(Product::class, 'seller_id');
+  }
+
+  // sebagai buyer
+  public function orders(): HasMany
+  {
+      return $this->hasMany(Order::class);
+  }
+
+  public function reviews(): HasMany
+  {
+      return $this->hasMany(Review::class);
+  }
+
+  // Has-Many-Through: seller -> OrderItem lewat Product
+  public function soldItems(): HasManyThrough
+  {
+      return $this->hasManyThrough(OrderItem::class, Product::class, 'seller_id');
+  }
 }

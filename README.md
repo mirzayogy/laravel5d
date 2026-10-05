@@ -1,58 +1,56 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# PartsHub – Database Design (Laravel)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**Assignment 1 – Table Relationships**
+Ahmad Zainal Febryan – 2410010414 – TI 5C REG BJB
 
-## About Laravel
+PartsHub adalah marketplace jual beli komponen PC. Selain produk, pesanan, dan ulasan, database-nya memodelkan **spesifikasi teknis** dan **kecocokan antar komponen** (misalnya socket CPU vs socket motherboard).
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Tech Stack
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- Laravel 13, PHP 8.4
+- SQLite
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Cara Menjalankan
 
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```powershell
+composer install
+copy .env.example .env
+php artisan key:generate
+php artisan migrate:fresh --seed
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+> Jika `composer install` menolak versi PHP (mis. PHP 8.4.0 vs syarat 8.4.1), gunakan `composer install --ignore-platform-reqs`.
 
-## Contributing
+## How to Verify
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```powershell
+php artisan migrate:fresh --seed     # 18 tabel terbentuk dan seeder berjalan tanpa error
+php artisan model:show Product       # daftar relasi Eloquent pada model Product
+php artisan tinker                   # hitung baris tiap tabel (db:show butuh ekstensi intl)
+```
 
-## Code of Conduct
+Contoh perintah di dalam tinker untuk menghitung isi tabel:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```php
+collect(['users','profiles','addresses','categories','brands','products','product_images','tags','product_tag','specification_types','product_specifications','compatibility_types','compatibility_rules','compatibilities','orders','order_items','payments','reviews'])->mapWithKeys(fn($t) => [$t => \Illuminate\Support\Facades\DB::table($t)->count()])
+```
 
-## Security Vulnerabilities
+## Isi Database
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+18 tabel: `users`, `profiles`, `addresses`, `categories`, `brands`, `products`, `product_images`, `tags`, `product_tag`, `specification_types`, `product_specifications`, `compatibility_types`, `compatibility_rules`, `compatibilities`, `orders`, `order_items`, `payments`, `reviews`.
 
-## License
+Jenis relasi yang dipakai: One-to-One, One-to-Many, Many-to-Many (dengan dan tanpa data pivot), Many-to-Many self-referencing, dan Has-Many-Through.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Akun Seeder
+
+| Peran | Email | Password |
+| --- | --- | --- |
+| Admin | admin@partshub.test | password |
+| Seller | seller1@partshub.test, seller2@partshub.test | password |
+| Buyer | buyer1@partshub.test sampai buyer3@partshub.test | password |
+
+## Dokumentasi
+
+- ERD dan ringkasan relasi: [docs/database/erd.md](docs/database/erd.md)
+- Laporan progres: [docs/progress/P01-database-design.md](docs/progress/P01-database-design.md)
+- Panduan fork dan PR: [docs/FORK_GUIDE.md](docs/FORK_GUIDE.md)
