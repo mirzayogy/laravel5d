@@ -1,58 +1,103 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# FishMarket — Aplikasi Penjualan Ikan
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+FishMarket adalah web aplikasi manajemen dan sistem penjualan ikan berbasis **Laravel**, **Blade**, dan **Tailwind CSS**. Proyek ini dibuat untuk tugas mata kuliah *Pemrograman Berbasis Objek 2 (PBO2)* dengan fokus utama pada perancangan dan implementasi **relasi tabel database** menggunakan Eloquent ORM.
 
-## About Laravel
+## Fitur Utama
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Pengelolaan katalog produk ikan yang terbagi dalam 8 kategori:
+  Ikan Hias, Ikan Konsumsi, Ikan Laut, Ikan Tawar, Bibit & Benih Ikan, Pakan Ikan, Perlengkapan Akuarium, dan Obat & Nutrisi Ikan
+- Pencatatan transaksi dan log penjualan harian produk ikan (`SalesLog`)
+- **Ulasan kepuasan pembeli** harian (`CustomerReview`, skala 1–5 bintang)
+- **Laporan harian toko** (`SalesReport`) yang dapat dihubungkan dengan ulasan transaksi
+- Pengingat restok produk (`RestockReminder`) dengan opsi hari & jam khusus
+- Tagging produk ikan untuk fleksibilitas pencarian (e.g. *segar*, *terlaris*, *diskon*, *grade_A*)
+- Lencana pencapaian seller (`Badge` / achievements)
+- Dashboard rekap penjualan, produk terlaris, dan progress per kategori
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Desain Database
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Skema lengkap database dan seluruh relasi tabel didokumentasikan dengan diagram Mermaid di
+[`docs/database/erd.md`](docs/database/erd.md).
 
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```mermaid
+erDiagram
+    USERS ||--o| PROFILES : "has one"
+    USERS ||--o{ FISHES : "owns/sells"
+    USERS ||--o{ CUSTOMER_REVIEWS : "records review"
+    USERS ||--o{ SALES_REPORTS : "writes report"
+    USERS }o--o{ BADGES : "earns badge"
+    CATEGORIES ||--o{ FISHES : "groups"
+    FISHES ||--o{ SALES_LOGS : "sales log"
+    FISHES ||--o{ RESTOCK_REMINDERS : "restock reminder"
+    FISHES }o--o{ TAGS : "tagged with"
+    CUSTOMER_REVIEWS ||--o| SALES_REPORTS : "may have"
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### Relasi Eloquent yang Diterapkan
 
-## Contributing
+| Tipe Relasi | Contoh Kasus pada Aplikasi Penjualan Ikan |
+|---|---|
+| One-to-One | `User` ↔ `Profile`, `CustomerReview` ↔ `SalesReport` |
+| One-to-Many | `User` → `Fish` (Produk Ikan), `Category` → `Fish`, `Fish` → `SalesLog` (Log Penjualan) |
+| Many-to-Many | `Fish` (Produk Ikan) ↔ `Tag` via `fish_tag` |
+| Many-to-Many dengan Pivot Data | `User` ↔ `Badge` (`earned_at`) via `badge_user` |
+| Has-Many-Through | `User` → `SalesLog` melalui `Fish`, `Category` → `SalesLog` melalui `Fish` |
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Tech Stack
 
-## Code of Conduct
+- PHP 8.3+ dan Laravel
+- Blade templates
+- Tailwind CSS (via Vite)
+- MySQL / SQLite
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Cara Menjalankan Aplikasi
 
-## Security Vulnerabilities
+```bash
+# Clone repositori
+git clone https://github.com/riezkyk/laravel5d.git
+cd laravel5d
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# Install dependensi
+composer install
+npm install
 
-## License
+# Konfigurasi environment
+cp .env.example .env
+php artisan key:generate
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# Jalankan migrasi dan seeder data penjualan ikan
+php artisan migrate --seed
+
+# Jalankan server
+npm run dev
+php artisan serve
+```
+
+Akses aplikasi di <http://localhost:8000>.
+
+## Progres Pengerjaan
+
+Catatan progres per fase (P01, ...) dan job (J1, J2, ...) lengkap dengan bukti commit: [`docs/progress/P01-database-design.md`](docs/progress/P01-database-design.md).
+
+## Struktur Proyek
+
+```
+app/Models/        Model Eloquent dan definisi relasi Penjualan Ikan
+database/
+  migrations/      Definisi tabel database Penjualan Ikan
+  factories/       Generator data dummy penjualan ikan
+  seeders/         Kategori dan sampel produk ikan
+resources/views/   Template Blade
+docs/
+  database/        ERD dan dokumentasi relasi database Penjualan Ikan
+  guides/          Panduan Git dan Pull Request
+  progress/        Laporan progres per fase
+```
+
+## Author
+
+Riezky Kurniawan — NPM 2410010564 — TI 5D REG BJB
+
+## Lisensi
+
+Dirilis di bawah [MIT License](https://opensource.org/licenses/MIT).
