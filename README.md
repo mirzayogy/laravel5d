@@ -1,58 +1,145 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# RentHub — Equipment & Vehicle Rental System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+RentHub adalah aplikasi web rental kendaraan dan peralatan berbasis **Laravel**, **Blade**, dan **Tailwind CSS**. Proyek ini dikembangkan untuk tugas mata kuliah *Pemrograman Berorientasi Objek 2 (PBO 2)* dengan fokus utama pada perancangan basis data dan implementasi **relasi antar tabel** menggunakan Eloquent ORM.
 
-## About Laravel
+## Informasi Mahasiswa
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+| Identitas | Keterangan |
+|---|---|
+| **Nama** | Wira Yudha Pamuji |
+| **NPM** | 2410010396 |
+| **Kelas** | TI 5D REG BJB |
+| **Mata Kuliah** | Pemrograman Berorientasi Objek 2 (PBO 2) |
+| **Dosen Pengampu** | Mirza Yogy Kurniawan |
+| **Fase / Tugas** | P01: Database Design and Table Relationships (Assignment 1) |
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Fitur Utama
 
-## Learning Laravel
+- **Katalog Sewa Multi-Kategori**: Mobil, Sepeda Motor, Kamera & Fotografi, Alat Camping & Outdoor, Sound System & Audio, dan Alat Konstruksi & Pertukangan.
+- **Spesifikasi Detail Unit**: Rincian nomor polisi/seri, tahun pembuatan, warna, catatan kondisi, dan spesifikasi teknis dalam format JSON.
+- **Sistem Transaksi Sewa (Rentals)**: Manajemen durasi sewa, kalkulasi biaya harian, dan pencatatan kondisi barang sebelum sewa.
+- **Pengembalian & Denda (Rental Returns)**: Verifikasi kondisi barang pasca-sewa, kalkulasi keterlambatan (hari), dan denda penalti.
+- **Tag Fleksibel**: Pengelompokan barang berdasarkan tag (Best Seller, Premium, Outdoor, Hemat, Portable, New Arrival).
+- **Kupon Promosi (Promotions)**: Penggunaan kupon diskon dengan pencatatan riwayat pemakaian dan nominal potongan.
+- **Ulasan & Rating (Reviews)**: Ulasan pelanggan (skala bintang 1–5) terhadap unit barang sewa.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+---
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Perancangan Basis Data (ERD)
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+Dokumentasi rancangan skema basis data lengkap tersedia di [`docs/database/erd.md`](docs/database/erd.md).
 
-## Agentic Development
+```mermaid
+erDiagram
+    USERS ||--o| PROFILES : "has one"
+    USERS ||--o{ RENTALS : "places"
+    USERS ||--o{ REVIEWS : "writes"
+    USERS }o--o{ PROMOTIONS : "redeems"
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+    CATEGORIES ||--o{ RENTAL_ITEMS : "categorizes"
+    RENTAL_ITEMS ||--o| ITEM_SPECIFICATIONS : "has specs"
+    RENTAL_ITEMS ||--o{ REVIEWS : "receives"
+    RENTAL_ITEMS }o--o{ TAGS : "tagged with"
+    
+    RENTALS ||--o| RENTAL_RETURNS : "has return record"
+    RENTALS ||--o{ RENTAL_DETAILS : "contains"
+    RENTAL_ITEMS ||--o{ RENTAL_DETAILS : "rented in"
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### Relasi Eloquent yang Diimplementasikan
 
-## Contributing
+| Tipe Relasi | Pasangan Model | Metode Eloquent | Deskripsi |
+|---|---|---|---|
+| **One-to-One** | `User` ↔ `Profile` | `hasOne` / `belongsTo` | Setiap pengguna memiliki satu profil biodata |
+| **One-to-One** | `RentalItem` ↔ `ItemSpecification` | `hasOne` / `belongsTo` | Setiap barang memiliki satu catatan spesifikasi teknis |
+| **One-to-One** | `Rental` ↔ `RentalReturn` | `hasOne` / `belongsTo` | Setiap transaksi sewa memiliki satu catatan pengembalian |
+| **One-to-Many** | `Category` → `RentalItem` | `hasMany` / `belongsTo` | Satu kategori menaungi banyak barang sewa |
+| **One-to-Many** | `User` → `Rental` | `hasMany` / `belongsTo` | Satu pengguna memiliki banyak transaksi sewa |
+| **One-to-Many** | `User` → `Review` | `hasMany` / `belongsTo` | Satu pengguna dapat menulis banyak ulasan |
+| **One-to-Many** | `RentalItem` → `Review` | `hasMany` / `belongsTo` | Satu barang sewa dapat menerima banyak ulasan |
+| **One-to-Many** | `Rental` → `RentalDetail` | `hasMany` / `belongsTo` | Satu sewa terdiri dari banyak baris detail barang |
+| **One-to-Many** | `RentalItem` → `RentalDetail` | `hasMany` / `belongsTo` | Satu barang tercatat di banyak detail transaksi |
+| **Many-to-Many** | `RentalItem` ↔ `Tag` | `belongsToMany` | Relasi tag produk melalui tabel pivot `item_tag` |
+| **Many-to-Many (Pivot Data)** | `Rental` ↔ `RentalItem` | `belongsToMany` + `withPivot` | Detail item sewa: `quantity`, `price_per_day`, `subtotal`, `condition_before` |
+| **Many-to-Many (Pivot Data)** | `User` ↔ `Promotion` | `belongsToMany` + `withPivot` | Penggunaan kupon diskon: `used_at`, `discount_amount` |
+| **Has-Many-Through** | `User` → `RentalDetail` | `hasManyThrough` | Mengakses seluruh detail barang sewa milik pengguna melalui transaksi |
+| **Has-Many-Through** | `Category` → `RentalDetail` | `hasManyThrough` | Mengakses riwayat peminjaman per kategori melalui barang |
+| **Has-Many-Through** | `Category` → `Review` | `hasManyThrough` | Mengakses seluruh ulasan dalam kategori melalui barang |
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## Memulai Proyek
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+# 1. Clone repository dari fork
+git clone https://github.com/wirayudhapamuji123/laravel5d.git
+cd laravel5d
 
-## Security Vulnerabilities
+# 2. Pindah ke branch fitur
+git switch feature/database-relations
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# 3. Pasang dependensi
+composer install
+npm install
 
-## License
+# 4. Konfigurasi file environment
+copy .env.example .env
+php artisan key:generate
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# 5. Jalankan migrasi dan seeder
+php artisan migrate:fresh --seed
+
+# 6. Jalankan pengujian relasi otomatis
+php artisan test
+
+# 7. Jalankan server lokal
+php artisan serve
+```
+
+---
+
+## Verifikasi dan Pengujian
+
+Seluruh relasi telah diuji secara otomatis menggunakan PHPUnit / Pest test suite pada file [`tests/Feature/DatabaseRelationsTest.php`](tests/Feature/DatabaseRelationsTest.php):
+
+```bash
+php artisan test --testsuite=Feature
+```
+
+**Hasil pengujian:** 14 passed tests, 50 assertions, 100% lulus.
+
+---
+
+## Panduan Fork & Alur Kerja Git
+
+Panduan langkah demi langkah cara fork, branch, dan membuat pull request (PR) ke repository dosen tersedia di:
+[`docs/guides/fork-guide.md`](docs/guides/fork-guide.md).
+
+Laporan progres pekerjaan fase `P01` tersedia di:
+[`docs/progress/P01-database-design.md`](docs/progress/P01-database-design.md).
+
+---
+
+## Struktur Folder
+
+```
+app/Models/              # Model Eloquent dan definisi relasi
+database/
+  migrations/            # Definisi skema tabel & constraint
+  factories/             # Generator data uji untuk setiap model
+  seeders/               # Seeder kategori dan data sampel RentHub
+tests/
+  Feature/               # Pengujian otomatis relasi basis data
+docs/
+  database/              # ERD dan dokumentasi relasi basis data
+  guides/                # Panduan alur Git dan Fork repository dosen
+  progress/              # Pelacak kemajuan fase dan job (P01)
+```
+
+---
+
+## Lisensi
+
+Dirilis di bawah [MIT License](https://opensource.org/licenses/MIT).
