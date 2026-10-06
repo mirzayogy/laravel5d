@@ -1,58 +1,96 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# ServiceHub - Sistem Manajemen Bengkel & Servis Kendaraan
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Proyek Praktikum Pemrograman Berorientasi Objek 2 (PBO 2) - Program Studi Teknik Informatika, Fakultas Teknologi Informasi, Universitas Islam Kalimantan Muhammad Arsyad Al Banjari.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 👨‍💻 Identitas Mahasiswa
+- **Nama Mahasiswa**: Muhammad Khairil Ilham
+- **NPM**: 2410010205
+- **Kelas**: TI 5D REG BJB
+- **Mata Kuliah**: Pemrograman Berorientasi Objek 2 (Laravel)
+- **Dosen Pengampu**: Mirza Yogy Kurniawan
+- **Repositori Dosen (Upstream)**: [mirzayogy/laravel5d](https://github.com/mirzayogy/laravel5d)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 📌 Deskripsi Proyek
+**ServiceHub** adalah aplikasi web berbasis Laravel untuk pengelolaan operasional bengkel modern, meliputi:
+- **Manajemen Profil Pengguna & Pelanggan** (Customer Profiles)
+- **Registrasi & Data Kendaraan** (Kendaraan milik pelanggan)
+- **Booking Jadwal Servis & Penugasan Mekanik**
+- **Laporan Inspeksi Fisik Awal Check-In Kendaraan** (Odometer, rem, ban, aki)
+- **Paket Layanan Servis & Kategori Servis**
+- **Katalog & Pemakaian Suku Cadang (Spare Parts)**
+- **Klaim Promo / Voucher Diskon**
+- **Faktur & Pembayaran Resmi (Invoices)**
+- **Ulasan & Penilaian Layanan (Customer Reviews)**
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 🗄️ Relasi Tabel (Eloquent Relationships)
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Proyek ini mengimplementasikan seluruh ragam relasi Eloquent:
+1. **One-to-One (1:1)**:
+   - `User` ⟷ `UserProfile`
+   - `ServiceBooking` ⟷ `InspectionReport`
+   - `ServiceBooking` ⟷ `Invoice`
+2. **One-to-Many (1:N)**:
+   - `User` ⟶ `Vehicle`
+   - `Vehicle` ⟶ `ServiceBooking`
+   - `ServiceCategory` ⟶ `ServicePackage`
+   - `Mechanic` ⟶ `ServiceBooking`
+   - `ServiceBooking` ⟶ `ServiceReview`
+3. **Many-to-Many (N:M with Pivot)**:
+   - `ServiceBooking` ⟷ `ServicePackage` (pivot: `package_price`, `technician_notes`)
+   - `ServiceBooking` ⟷ `SparePart` (pivot: `quantity`, `unit_price`, `subtotal_price`)
+   - `User` ⟷ `Promotion` (pivot: `discount_applied`, `used_at`)
+4. **Has-Many-Through**:
+   - `User` ⟶ `ServiceBooking` (through `Vehicle`)
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+Dokumentasi lengkap ERD dan diagram Mermaid dapat dilihat di:
+👉 [`docs/database/erd.md`](docs/database/erd.md)
 
-## Agentic Development
+---
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## 🚀 Panduan Menjalankan Proyek
 
+### 1. Kloning & Persiapan Lingkungan
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone https://github.com/muhammadiril56/laravel5d.git
+cd laravel5d
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2. Instalasi Dependensi
+```bash
+composer install
+npm install
+```
 
-## Contributing
+### 3. Konfigurasi Environment
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 4. Eksekusi Migrasi & Data Seeder
+```bash
+php artisan migrate:fresh --seed
+```
 
-## Code of Conduct
+### 5. Jalankan Automated Tests
+```bash
+php artisan test --filter=DatabaseRelationsTest
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 6. Menjalankan Server Lokal
+```bash
+php artisan serve
+```
+Buka browser pada alamat: `http://localhost:8000`
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 📋 Progres Tugas
+Laporan tahapan pengerjaan tugas dicatat pada:
+👉 [`docs/progress/P01-database-design.md`](docs/progress/P01-database-design.md)
