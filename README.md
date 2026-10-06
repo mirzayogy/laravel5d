@@ -1,3 +1,34 @@
+# Gantangan: Songbird Contest Registry
+
+| | |
+|---|---|
+| **Name** | Sahrawardi |
+| **NPM** | 2410010497 |
+| **Class** | TI 5C REG BJB |
+| **GitHub** | [Sahrawardi9](https://github.com/Sahrawardi9) |
+| **Assignment** | Assignment 1: Table Relationships |
+
+Gantangan is a registry for songbird contests. Owners register their birds, organizers hold contests, judges are certified per species, and each bird's entry carries a number, a division, a score and a final rank. The project is built on Laravel 13 and currently covers the database layer: migrations, Eloquent models and relationships, factories, seeders and automated tests.
+
+## Documentation
+
+- [Entity Relationship Diagram](docs/database/erd.md)
+- [Progress report P01: Database Design](docs/progress/P01-database-design.md)
+
+## Running the project
+
+```
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate:fresh --seed
+php artisan test
+```
+
+The seeded demo account is `test@example.com` with the password `password`.
+
+---
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">
