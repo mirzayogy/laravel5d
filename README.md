@@ -1,58 +1,58 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Recipe App - Academic Project
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A Laravel-based web application designed to manage culinary recipes, categories, ingredients, user profiles, and reviews. Built for the Object-Oriented Programming II (PBO2) coursework.
 
-## About Laravel
+## Features & Architecture
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+* **User Management & Profiles**: One-to-One relationship (`users` & `profiles`).
+* **Recipe Catalog**: Categorized recipes supporting preparation time, cooking time, and difficulty levels (`categories` & `recipes`).
+* **Ingredients & Pivots**: Many-to-Many relationship between recipes and ingredients with pivot quantities (`recipe_ingredient`).
+* **Interactive Reviews & Favorites**:
+  * One-to-Many reviews for recipes (`reviews`).
+  * Many-to-Many favorite bookmarks per user (`favorites`).
+  * Has-Many-Through relation for gathering reviews through user recipes.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+  ## Database Schema (ERD Summary)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+  The application utilizes 8 core database tables:
+1. `users`
+2. `profiles`
+3. `categories`
+4. `recipes`
+5. `ingredients`
+6. `reviews`
+7. `favorites` (pivot)
+8. `recipe_ingredient` (pivot)
 
-## Learning Laravel
+Detailed Mermaid ERD documentation is available at [`docs/database/erd.md`](docs/database/erd.md).
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Local Development Setup
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Prerequisites
+* PHP >= 8.2
+* Composer
+* MySQL / MariaDB
+* Node.js & NPM
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## Installation Steps
 
-## Agentic Development
+### 1. **Clone the repository:**
+   git clone [https://github.com/AishaNazela/PBO2_LARAVEL_5C.git](https://github.com/AishaNazela/PBO2_LARAVEL_5C.git)
+   cd PBO2_LARAVEL_5C
+   
+###  2. **Install PHP dependencies:**
+    composer install
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+### 3. **Configure Environment:**
+    cp .env.example .env
+    php artisan key:generate
 
-```bash
-composer require laravel/boost --dev
+### 4. **Run Migrations and Seeders:**
+    php artisan migrate:fresh --seed
 
-php artisan boost:install
-```
-
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 5. **Start the Application:**
+    php artisan serve       
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is open-sourced software licensed under the [MIT License](https://opensource.org/licenses/MIT).
