@@ -1,58 +1,79 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Laundry Express — Sistem Informasi Manajemen Services Laundry
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+> **Tugas 1 (Assignment 1)**: Database Design and Table Relationships  
+> **Mata Kuliah**: Pemrograman Berbasis Objek 2 (PBO 2) / Laravel Framework  
+> **Dosen Pengampu**: Mirza Yogy Utama  
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 👤 Identitas Mahasiswa
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| Informasi | Detail |
+|---|---|
+| **Nama** | Muhammad Ixmal Alimudin |
+| **NPM** | 2410010280 |
+| **Kelas** | TI 5D REG BJB |
+| **Repositori Fork** | [ixmalUK/laravel5d](https://github.com/ixmalUK/laravel5d) |
+| **Upstream Repositori** | [mirzayogy/laravel5d](https://github.com/mirzayogy/laravel5d) |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## 📌 Ringkasan Proyek
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+**Laundry Express** adalah aplikasi sistem informasi manajemen jasa laundry berbasis web yang dirancang menggunakan framework Laravel 11/12 untuk mengelola operasional bisnis laundry kiloan, satuan spesialis (bedcover, jas, gaun), hingga perawatan sepatu & tas. Sistem ini mengelola data pelanggan, katalog kategori & layanan, nomor rak penyimpanan pakaian, pendaftaran transaksi cucian (*laundry orders*), rincian item, transaksi pembayaran, riwayat perubahan status pengerjaan (*status logs*), hingga ulasan kepuasan pelanggan (*customer reviews*).
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## 🗄️ Daftar Entitas & Tabel Database
 
-## Agentic Development
+Sistem ini memiliki **10 tabel database** yang saling terhubung:
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+1. **`users`**: Data pengguna (Admin, Staff Operator, Customer).
+2. **`user_profiles`**: Profil detail pengguna (NIK, kontak darurat, catatan tambahan, avatar).
+3. **`service_categories`**: Kategori layanan (Layanan Kiloan, Satuan & Spesialis, Sepatu & Tas).
+4. **`service_items`**: Detail layanan (Cuci Komplit, Cuci Express, Bedcover, Deep Clean Sneakers).
+5. **`storage_racks`**: Rak lokasi penyimpanan pakaian siap ambil (Kode Rak, Zona, Kapasitas).
+6. **`laundry_orders`**: Transaksi penerimaan order laundry (Kode Order, Pelanggan, Rak, Total Berat, Total Bayar, Status).
+7. **`order_items`**: Detail item rincian pesanan laundry (N:M pivot antara Order & ServiceItem).
+8. **`payments`**: Catatan transaksi pembayaran order laundry (Kode Pembayaran, Metode, Status, Tanggal Bayar).
+9. **`order_status_logs`**: Log historis pergeseran status pengerjaan laundry oleh Staff.
+10. **`customer_reviews`**: Ulasan dan rating kepuasan pelanggan atas order laundry.
+
+---
+
+## 🔗 Matriks Relasi Eloquent
+
+| Relasi | Model Asal | Model Tujuan | Jenis Relasi | Keterangan |
+|---|---|---|---|---|
+| 1 | `User` | `UserProfile` | **One-to-One (1:1)** | Profil pengguna terhubung 1:1 dengan User |
+| 2 | `ServiceCategory` | `ServiceItem` | **One-to-Many (1:N)** | Kategori layanan membawahi banyak item service |
+| 3 | `User` (Customer) | `LaundryOrder` | **One-to-Many (1:N)** | Pelanggan (*Customer*) memiliki banyak pesanan laundry |
+| 4 | `StorageRack` | `LaundryOrder` | **One-to-Many (1:N)** | Rak penyimpanan menampung banyak pesanan laundry |
+| 5 | `LaundryOrder` | `ServiceItem` | **Many-to-Many (N:M)** | Order berisi item service melalui `order_items` |
+| 6 | `LaundryOrder` | `Payment` | **One-to-Many (1:N)** | Pesanan laundry memiliki catatan tagihan pembayaran |
+| 7 | `User` (Customer) | `Payment` | **Has-Many-Through** | Mengakses pembayaran Pelanggan melalui pesanan LaundryOrder |
+| 8 | `ServiceCategory` | `OrderItem` | **Has-Many-Through** | Mengakses rincian item order di Kategori melalui ServiceItem |
+| 9 | `LaundryOrder` | `OrderStatusLog` | **One-to-Many (1:N)** | Pesanan laundry memiliki log historis perubahan status |
+| 10 | `LaundryOrder` | `CustomerReview` | **One-to-One (1:1)** | Pesanan laundry memiliki 1 ulasan kepuasan dari pelanggan |
+
+---
+
+## 📄 Dokumentasi Terkait
+
+- **Entity Relationship Diagram (ERD)**: [`docs/database/erd.md`](docs/database/erd.md)
+- **Laporan Progres P01**: [`docs/progress/P01-database-design.md`](docs/progress/P01-database-design.md)
+- **Panduan Fork & Pull Request**: [`docs/FORK_GUIDE.md`](docs/FORK_GUIDE.md)
+
+---
+
+## 🧪 Cara Verifikasi & Pengujian
+
+Jalankan perintah berikut di terminal:
 
 ```bash
-composer require laravel/boost --dev
+# 1. Jalankan migrasi dan seeder
+php artisan migrate:fresh --seed
 
-php artisan boost:install
+# 2. Jalankan pengujian otomatis untuk relasi database
+php artisan test --filter=DatabaseRelationshipsTest
 ```
-
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
