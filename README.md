@@ -1,58 +1,134 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Aplikasi & Sistem Basis Data Laundry (Laravel 5D)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Nama: M. Fajri Mubaraq
+NPM: 2410010117
+Kelas: Reg Ti 5C
 
-## About Laravel
+Repository ini berisi proyek Laravel 5D beserta dokumentasi Entity Relationship Diagram (ERD) dan skema basis data sistem transaksi Laundry.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## 📊 Entity Relationship Diagram (ERD)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Diagram relasi antar tabel basis data Laundry. (GitHub secara otomatis merender blok `mermaid` di bawah ini menjadi gambar diagram interaktif).
 
-## Learning Laravel
+```mermaid
+erDiagram
+    PELANGGAN ||--o{ TRANSAKSI : memesan
+    KARYAWAN ||--o{ TRANSAKSI : melayani
+    TRANSAKSI ||--|{ DETAIL_TRANSAKSI : memiliki
+    LAYANAN ||--o{ DETAIL_TRANSAKSI : dipilih
+    TRANSAKSI ||--o{ PEMBAYARAN : dibayar
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+    PELANGGAN {
+        int id_pelanggan PK
+        varchar nama
+        varchar no_hp
+        text alamat
+    }
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+    KARYAWAN {
+        int id_karyawan PK
+        varchar nama
+        varchar username
+        varchar password
+        varchar role
+    }
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+    LAYANAN {
+        int id_layanan PK
+        varchar nama_layanan
+        decimal harga_per_kg
+        int estimasi_hari
+    }
 
-## Agentic Development
+    TRANSAKSI {
+        int id_transaksi PK
+        int id_pelanggan FK
+        int id_karyawan FK
+        date tgl_masuk
+        date tgl_selesai
+        varchar status
+        decimal total_harga
+    }
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+    DETAIL_TRANSAKSI {
+        int id_detail PK
+        int id_transaksi FK
+        int id_layanan FK
+        decimal berat_kg
+        decimal subtotal
+    }
 
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+    PEMBAYARAN {
+        int id_pembayaran PK
+        int id_transaksi FK
+        date tgl_bayar
+        varchar metode
+        decimal jumlah_bayar
+    }
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+---
 
-## Contributing
+## 📋 Keterangan Relasi & Kardinalitas
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+| Relasi                           | Kardinalitas | Penjelasan / Arti                                                      |
+| -------------------------------- | ------------ | ---------------------------------------------------------------------- |
+| `pelanggan` ➔ `transaksi`        | **1 : N**    | Satu pelanggan bisa melakukan transaksi/pemesanan berkali-kali.        |
+| `karyawan` ➔ `transaksi`         | **1 : N**    | Satu karyawan (kasir) melayani banyak transaksi.                       |
+| `transaksi` ➔ `detail_transaksi` | **1 : N**    | Satu nota transaksi berisi satu atau lebih item detail layanan cucian. |
+| `layanan` ➔ `detail_transaksi`   | **1 : N**    | Satu jenis layanan dapat dipilih di banyak detail transaksi.           |
+| `transaksi` ➔ `pembayaran`       | **1 : N**    | Satu transaksi bisa dibayar sekali lunas atau dicicil.                 |
 
-## Code of Conduct
+### 🗝️ Keterangan Simbol ERD
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+- `PK`: Primary Key (Kunci Utama)
+- `FK`: Foreign Key (Kunci Tamu)
+- `||--o{`: Relasi satu ke nol atau banyak (One-to-Many Optional)
+- `||--|{`: Relasi satu ke satu atau banyak (One-to-Many Mandatory)
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## 🗄️ File Skema & Migrasi Database
 
-## License
+- **File ERD Markdown**: [`database/ERD.md`](database/ERD.md)
+- **File Script SQL Raw**: [`database/laundry_db.sql`](database/laundry_db.sql)
+- **Model Laravel**:
+    - `App\Models\Pelanggan`
+    - `App\Models\Karyawan`
+    - `App\Models\Layanan`
+    - `App\Models\Transaksi`
+    - `App\Models\DetailTransaksi`
+    - `App\Models\Pembayaran`
+- **Database Seeders**: `database/seeders/LaundrySeeder.php`
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+## 🚀 Panduan Menjalankan Proyek
+
+1. **Clone Repository**:
+
+    ```bash
+    git clone https://github.com/Fajri-Mubaraq/laravel5d.git
+    cd laravel5d
+    ```
+
+2. **Install Dependensi & Konfigurasi Environment**:
+
+    ```bash
+    composer install
+    cp .env.example .env
+    php artisan key:generate
+    ```
+
+3. **Migrasi Database & Seeder**:
+
+    ```bash
+    php artisan migrate --seed
+    ```
+
+4. **Jalankan Server Lokal**:
+    ```bash
+    php artisan serve
+    ```
