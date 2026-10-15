@@ -1,3 +1,141 @@
+## Assignment
+ 
+Assignment 2: Design Database ERD.
+ 
+| | |
+|---|---|
+| **Student** | Muhammad Rizky |
+| **NPM** | 2410010226 |
+| **Class** | 5C |
+| **Phase** | P02: Design Database ERD |
+| **Status** | Done |
+| **Fork / branch** | https://github.com/rizkymhmd06/Tugas-1-PBO-2 / feature/design-database |
+ 
+## What was done
+ 
+| Job | Description | Status |
+|---|---|---|
+| J1 | Add Name and NPM to README | Done |
+| J2 | Add Design Database ERD | Done |
+ 
+## Design Database ERD
+ 
+**Judul Proyek:** Aplikasi E-Commerce Sederhana
+ 
+### Daftar Tabel
+ 
+| No | Tabel | Fungsi |
+|---|---|---|
+| 1 | users | Data pelanggan |
+| 2 | addresses | Alamat pengiriman milik pelanggan |
+| 3 | categories | Kategori produk |
+| 4 | products | Data produk yang dijual |
+| 5 | orders | Data pesanan |
+| 6 | order_items | Rincian produk di setiap pesanan |
+| 7 | payments | Data pembayaran pesanan |
+ 
+### Struktur Tabel
+ 
+**1. users**
+ 
+| Kolom | Tipe | Key | Keterangan |
+|---|---|---|---|
+| id | bigint | PK | ID pelanggan |
+| name | string | | Nama pelanggan |
+| email | string | | Email pelanggan |
+| password | string | | Kata sandi (terenkripsi) |
+| phone | string | | Nomor telepon |
+ 
+**2. addresses**
+ 
+| Kolom | Tipe | Key | Keterangan |
+|---|---|---|---|
+| id | bigint | PK | ID alamat |
+| user_id | bigint | FK | Mengacu ke users.id |
+| recipient_name | string | | Nama penerima |
+| address | string | | Alamat lengkap |
+| city | string | | Kota |
+| postal_code | string | | Kode pos |
+ 
+**3. categories**
+ 
+| Kolom | Tipe | Key | Keterangan |
+|---|---|---|---|
+| id | bigint | PK | ID kategori |
+| name | string | | Nama kategori |
+| description | string | | Deskripsi kategori |
+ 
+**4. products**
+ 
+| Kolom | Tipe | Key | Keterangan |
+|---|---|---|---|
+| id | bigint | PK | ID produk |
+| category_id | bigint | FK | Mengacu ke categories.id |
+| name | string | | Nama produk |
+| description | text | | Deskripsi produk |
+| price | decimal | | Harga produk |
+| stock | int | | Jumlah stok |
+ 
+**5. orders**
+ 
+| Kolom | Tipe | Key | Keterangan |
+|---|---|---|---|
+| id | bigint | PK | ID pesanan |
+| user_id | bigint | FK | Mengacu ke users.id |
+| address_id | bigint | FK | Mengacu ke addresses.id |
+| order_date | date | | Tanggal pesanan |
+| status | string | | Status pesanan |
+| total | decimal | | Total harga |
+ 
+**6. order_items**
+ 
+| Kolom | Tipe | Key | Keterangan |
+|---|---|---|---|
+| id | bigint | PK | ID rincian pesanan |
+| order_id | bigint | FK | Mengacu ke orders.id |
+| product_id | bigint | FK | Mengacu ke products.id |
+| quantity | int | | Jumlah produk |
+| price | decimal | | Harga satuan saat dipesan |
+ 
+**7. payments**
+ 
+| Kolom | Tipe | Key | Keterangan |
+|---|---|---|---|
+| id | bigint | PK | ID pembayaran |
+| order_id | bigint | FK | Mengacu ke orders.id |
+| method | string | | Metode pembayaran |
+| amount | decimal | | Jumlah dibayar |
+| status | string | | Status pembayaran |
+| paid_at | datetime | | Waktu pembayaran |
+ 
+### Relasi Antar Tabel
+ 
+| Tabel Asal | Relasi | Tabel Tujuan | Keterangan |
+|---|---|---|---|
+| users | 1 : N | addresses | Satu pelanggan bisa punya banyak alamat |
+| users | 1 : N | orders | Satu pelanggan bisa membuat banyak pesanan |
+| addresses | 1 : N | orders | Satu alamat bisa dipakai di banyak pesanan |
+| categories | 1 : N | products | Satu kategori memiliki banyak produk |
+| orders | 1 : N | order_items | Satu pesanan berisi banyak item |
+| products | 1 : N | order_items | Satu produk bisa ada di banyak item pesanan |
+| orders | 1 : 1 | payments | Satu pesanan memiliki satu pembayaran |
+ 
+### Gambaran Relasi
+ 
+```
+users ----< addresses ----< orders
+users ----< orders
+categories ----< products ----< order_items >---- orders
+orders ----- payments
+ 
+Keterangan: ----< artinya satu ke banyak (1 : N)
+            -----  artinya satu ke satu (1 : 1)
+```
+ 
+---
+
+--------------------------------------------------------------------------------------
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">
