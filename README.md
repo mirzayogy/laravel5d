@@ -1,58 +1,160 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🐾 Sistem Adopsi Hewan
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistem informasi adopsi hewan peliharaan. Pengguna dapat melihat daftar hewan yang tersedia berdasarkan kategori, lalu mengajukan adopsi. Admin mengelola data hewan, kategori, dan memproses pengajuan adopsi.
 
-## About Laravel
+## 📋 Daftar Isi
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- [Fitur](#-fitur)
+- [Struktur Database (ERD)](#-struktur-database-erd)
+- [Relasi Antar Tabel](#-relasi-antar-tabel)
+- [Detail Tabel](#-detail-tabel)
+- [Instalasi](#-instalasi)
+- [Kontribusi](#-kontribusi)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## ✨ Fitur
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Berdasarkan rancangan database, sistem ini mendukung:
 
-## Learning Laravel
+- **Manajemen pengguna** dengan dua peran (`admin` dan `user`)
+- **Manajemen kategori** hewan (dilengkapi `slug`)
+- **Manajemen data hewan** (nama, umur, jenis kelamin, deskripsi, gambar, status)
+- **Pengajuan adopsi** oleh pengguna beserta alasan adopsi
+- **Status adopsi**: `pending`, `approved`, `rejected`
+- **Status hewan**: `available`, `adopted`
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 🗂️ Struktur Database (ERD)
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```mermaid
+erDiagram
+    USERS ||--o{ ADOPTIONS : mengajukan
+    PETS ||--o{ ADOPTIONS : "diadopsi melalui"
+    CATEGORIES ||--o{ PETS : "kategori dari"
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+    USERS {
+        bigint id PK
+        string name
+        string email
+        string password
+        string phone
+        string address
+        enum role "admin, user"
+        timestamps timestamps
+    }
 
-## Agentic Development
+    CATEGORIES {
+        bigint id PK
+        string name
+        string slug
+        timestamps timestamps
+    }
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+    PETS {
+        bigint id PK
+        bigint category_id FK
+        string name
+        int age
+        enum gender "Jantan, Betina"
+        text description
+        string image
+        enum status "available, adopted"
+        timestamps timestamps
+    }
 
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+    ADOPTIONS {
+        bigint id PK
+        bigint user_id FK
+        bigint pet_id FK
+        text reason
+        enum status "pending, approved, rejected"
+        date adoption_date
+        timestamps timestamps
+    }
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+## 🔗 Relasi Antar Tabel
 
-## Contributing
+| Relasi | Keterangan | Tipe |
+|---|---|---|
+| `users` → `adoptions` | Pengguna **mengajukan** adopsi | One to Many |
+| `categories` → `pets` | Hewan **berkategori** dari suatu kategori | One to Many |
+| `pets` → `adoptions` | Hewan **diadopsi melalui** pengajuan adopsi | One to Many |
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 📑 Detail Tabel
 
-## Code of Conduct
+### `users`
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+| Kolom | Keterangan |
+|---|---|
+| `id` | Primary Key |
+| `name` | Nama pengguna |
+| `email` | Email pengguna |
+| `password` | Kata sandi |
+| `phone` | Nomor telepon |
+| `address` | Alamat |
+| `role` | `admin` atau `user` |
+| `timestamps` | Waktu dibuat & diperbarui |
 
-## Security Vulnerabilities
+### `categories`
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+| Kolom | Keterangan |
+|---|---|
+| `id` | Primary Key |
+| `name` | Nama kategori |
+| `slug` | Slug kategori |
+| `timestamps` | Waktu dibuat & diperbarui |
 
-## License
+### `pets`
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+| Kolom | Keterangan |
+|---|---|
+| `id` | Primary Key |
+| `category_id` | Foreign Key → `categories.id` |
+| `name` | Nama hewan |
+| `age` | Umur hewan |
+| `gender` | `Jantan` atau `Betina` |
+| `description` | Deskripsi hewan |
+| `image` | Gambar hewan |
+| `status` | `available` atau `adopted` |
+| `timestamps` | Waktu dibuat & diperbarui |
+
+### `adoptions`
+
+| Kolom | Keterangan |
+|---|---|
+| `id` | Primary Key |
+| `user_id` | Foreign Key → `users.id` |
+| `pet_id` | Foreign Key → `pets.id` |
+| `reason` | Alasan mengadopsi |
+| `status` | `pending`, `approved`, atau `rejected` |
+| `adoption_date` | Tanggal adopsi |
+| `timestamps` | Waktu dibuat & diperbarui |
+
+## 🚀 Instalasi
+
+> Sesuaikan langkah di bawah dengan teknologi yang kamu pakai.
+
+```bash
+# 1. Clone repository
+git clone https://github.com/AdeliaRikaDonita/laravel5d
+
+# 2. Masuk ke folder project
+cd laravel5d
+
+# 3. Install dependensi & atur konfigurasi (.env / database)
+
+# 4. Jalankan migrasi database
+
+# 5. Jalankan aplikasi
+```
+
+## 🤝 Kontribusi
+
+1. Fork repository ini
+2. Buat branch baru (`git checkout -b fitur-baru`)
+3. Commit perubahan (`git commit -m "Tambah fitur baru"`)
+4. Push ke branch (`git push origin fitur-baru`)
+5. Buat Pull Request
+
+## 📄 Lisensi
+
+Tentukan lisensi project kamu di sini (misalnya MIT).
