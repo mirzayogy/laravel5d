@@ -1,58 +1,153 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sistem Penyewaan Alat Camping
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistem Penyewaan Alat Camping adalah aplikasi web manajemen penyewaan alat camping yang dibangun dengan **Laravel**, **Blade**, dan **Tailwind CSS**. Proyek ini difokuskan pada **perancangan database dan relasi antar tabel** menggunakan Eloquent ORM, mulai dari data pelanggan, peralatan, transaksi penyewaan, hingga pengembalian dan denda.
 
-## About Laravel
+## Fitur
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Manajemen data pelanggan (nama, alamat, nomor telepon)
+- Manajemen data peralatan camping beserta kategori, stok, dan harga sewa per hari
+- Transaksi penyewaan dengan tanggal sewa dan tanggal kembali rencana
+- Satu transaksi penyewaan dapat memuat banyak jenis peralatan beserta jumlahnya
+- Perhitungan total biaya sewa berdasarkan lama sewa dan harga sewa per hari
+- Pencatatan pengembalian alat dengan tanggal kembali aktual
+- Perhitungan denda apabila pengembalian melebihi tanggal kembali rencana
+- Pengurangan dan penambahan stok peralatan secara otomatis saat disewa dan dikembalikan
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Desain Database
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Skema database dan seluruh relasinya didokumentasikan dengan diagram ERD berikut.
 
-## Learning Laravel
+![ERD Sistem Penyewaan Alat Camping](docs/database/ERD_sistem_penyewaan_alat_camping.png)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Versi Mermaid dari ERD yang sama:
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```mermaid
+erDiagram
+    PELANGGAN {
+        bigint id_pelanggan PK
+        string nama
+        string alamat
+        string nomor_telepon
+    }
+    PENYEWAAN {
+        bigint nomor_rental PK
+        bigint id_pelanggan FK
+        date tanggal_sewa
+        date tanggal_kembali_rencana
+        decimal total_biaya
+    }
+    PERALATAN {
+        bigint id_peralatan PK
+        string nama_alat
+        string kategori
+        int stok
+        decimal harga_sewa_perhari
+    }
+    DETAIL_PENYEWAAN {
+        bigint nomor_rental PK, FK
+        bigint id_peralatan PK, FK
+        int jumlah
+    }
+    PENGEMBALIAN {
+        bigint nomor_kembali PK
+        bigint nomor_rental FK "unique"
+        date tanggal_kembali_aktual
+        decimal denda
+    }
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+    PELANGGAN ||--o{ PENYEWAAN : melakukan
+    PENYEWAAN ||--|{ DETAIL_PENYEWAAN : memuat
+    PERALATAN ||--o{ DETAIL_PENYEWAAN : digunakan
+    PENYEWAAN ||--o| PENGEMBALIAN : "dapat dikembalikan"
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### Struktur Tabel
 
-## Contributing
+| Tabel              | Primary Key                       | Foreign Key                      | Atribut Lain                                                      |
+| ------------------ | --------------------------------- | -------------------------------- | ----------------------------------------------------------------- |
+| `pelanggan`        | `id_pelanggan`                    | —                                | `nama`, `alamat`, `nomor_telepon`                                 |
+| `penyewaan`        | `nomor_rental`                    | `id_pelanggan`                   | `tanggal_sewa`, `tanggal_kembali_rencana`, `total_biaya`          |
+| `peralatan`        | `id_peralatan`                    | —                                | `nama_alat`, `kategori`, `stok`, `harga_sewa_perhari`             |
+| `detail_penyewaan` | `nomor_rental` + `id_peralatan`   | `nomor_rental`, `id_peralatan`   | `jumlah`                                                          |
+| `pengembalian`     | `nomor_kembali`                   | `nomor_rental`                   | `tanggal_kembali_aktual`, `denda`                                 |
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Relasi yang Tercakup
 
-## Code of Conduct
+| Tipe                          | Contoh                                                                                                    |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------- |
+| One-to-One (opsional, 1 ke 0..1) | `Penyewaan` ↔ `Pengembalian`                                                                           |
+| One-to-Many                   | `Pelanggan` → `Penyewaan`, `Penyewaan` → `DetailPenyewaan`, `Peralatan` → `DetailPenyewaan`               |
+| Many-to-Many with pivot data  | `Penyewaan` ↔ `Peralatan` melalui `detail_penyewaan` (`jumlah`)                                           |
+| Has-Many-Through              | `Pelanggan` → `DetailPenyewaan` melalui `Penyewaan`                                                       |
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Aturan Bisnis
 
-## Security Vulnerabilities
+- Satu pelanggan dapat melakukan banyak penyewaan, tetapi setiap penyewaan hanya dimiliki satu pelanggan.
+- Satu penyewaan dapat memuat banyak peralatan, dan satu peralatan dapat muncul di banyak penyewaan (relasi many-to-many melalui `detail_penyewaan`).
+- Setiap penyewaan memiliki paling banyak satu data pengembalian (`0..1`); penyewaan tanpa pengembalian berarti alat belum dikembalikan.
+- `jumlah` yang disewa tidak boleh melebihi `stok` peralatan yang tersedia.
+- `total_biaya` = jumlah dari (`jumlah` × `harga_sewa_perhari` × lama sewa) untuk setiap peralatan dalam penyewaan.
+- `denda` dikenakan jika `tanggal_kembali_aktual` lebih besar dari `tanggal_kembali_rencana`.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Tech Stack
 
-## License
+- PHP 8.3+ dan Laravel
+- Blade templates
+- Tailwind CSS (via Vite)
+- MySQL atau SQLite
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Cara Menjalankan
+
+```bash
+# Clone repository
+git clone https://github.com/maulidahasanah14/laravel5d
+cd laravel5d
+
+# Install dependensi
+composer install
+npm install
+
+# Konfigurasi environment
+cp .env.example .env
+php artisan key:generate
+
+# Buat skema database
+php artisan migrate --seed
+
+# Jalankan development server
+npm run dev
+php artisan serve
+```
+
+Kemudian buka <http://localhost:8000>.
+
+## Struktur Proyek
+
+```
+app/Models/        Model Eloquent dan relasinya
+database/
+  migrations/      Definisi tabel
+  factories/       Generator data dummy
+  seeders/         Data awal peralatan dan contoh data
+resources/views/   Template Blade
+docs/
+  database/        ERD dan dokumentasi relasi
+```
+
+## Roadmap
+
+- [x] Perancangan dan dokumentasi database (ERD)
+- [ ] Migration, model, factory, dan seeder
+- [ ] CRUD pelanggan
+- [ ] CRUD peralatan dan manajemen stok
+- [ ] Transaksi penyewaan dan detail penyewaan
+- [ ] Pengembalian dan perhitungan denda
+- [ ] Laporan penyewaan
+
+## Penulis
+
+Maulida Hasanah — NPM <2410010242>
+
+## Lisensi
+
+Dirilis di bawah [MIT License](https://opensource.org/licenses/MIT).
