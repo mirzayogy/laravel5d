@@ -15,6 +15,17 @@ Flagboard is a Capture The Flag (CTF) competition management web application bui
 - Writeups written by players and linked to a challenge (draft or published)
 - Tags for flexible challenge organization
 - Role-based access: `admin` manages competitions and challenges, `player` participates
+- Competition phases that follow the clock (upcoming, live, finished) with countdown timers
+- Challenge board with search and filters, first blood badges, and solve counts
+- Live scoreboard with a podium, a score-over-time chart, and automatic refresh
+- Teams with a captain, a member limit, member management, a public directory, and team pages
+- Dashboard with rank, progress, and team activity; a recent activity feed on the home and competition pages
+- In-app notifications (teammate solves, first blood, team changes, role changes)
+- Email verification and password reset (emails go to the log in local development)
+- Writeups in Markdown with a live preview, search, and filters
+- Admin area: overview with a chart, users and roles, teams, competitions, challenges, categories, and tags
+- A playful sky blue and coral design that works on phones, tablets, and desktops
+- Lots of demo data, so every page has something to show
 
 ## Database Design
 
@@ -25,6 +36,8 @@ The full schema and every relationship are documented with Mermaid diagrams in
 erDiagram
     USERS ||--o| PROFILES : "has one"
     TEAMS ||--o{ USERS : "has members"
+    USERS ||--o{ TEAMS : "captains"
+    USERS ||--o{ NOTIFICATIONS : "receives"
     USERS ||--o{ SUBMISSIONS : "makes"
     USERS ||--o{ WRITEUPS : "writes"
 
@@ -61,6 +74,15 @@ erDiagram
         bigint id PK
         string name UK
         string invite_code UK
+        bigint captain_id FK "nullable"
+    }
+    NOTIFICATIONS {
+        uuid id PK
+        string type
+        string notifiable_type
+        bigint notifiable_id
+        text data
+        timestamp read_at "nullable"
     }
     COMPETITIONS {
         bigint id PK
@@ -143,8 +165,11 @@ erDiagram
 - A team can have only one correct submission per challenge.
 - Flags are compared using hash verification (`Hash::check`) against `challenges.flag_hash`.
 - Team score = sum of `points` of solved challenges − sum of `cost` of unlocked hints.
-- A team can only submit to challenges of a competition it is registered in, while the competition status is `running`.
-- A team can register for a competition only while its status is `running`, and a draft competition is hidden from players.
+- A team can only submit to challenges of a competition it is registered in, while the competition is running (between its start and end time).
+- A team can register for a competition while it is upcoming or running. A draft competition is hidden from players, and the challenges unlock when the competition starts.
+- Registering teams, submitting flags, unlocking hints, and writing writeups need a verified email address.
+- A team has at most 4 players (`config/flagboard.php`). The creator is the captain. Only the captain can rename the team, renew the invite code, remove members, hand over the captain role, or disband the team.
+- A team with submissions cannot be disbanded or deleted, because the scoreboards need its history.
 - A hint cannot be unlocked twice, and not after the team has solved that challenge.
 - A player can write a writeup for a challenge only after the player's team has solved it. A draft writeup is visible to its author only.
 - Only `admin` users can create, edit, or delete competitions, challenges, and hints.
@@ -183,23 +208,27 @@ Then open <http://localhost:8000>.
 
 ### Demo accounts
 
-`php artisan migrate --seed` also creates a demo competition (`Flagboard Demo CTF`) with sample teams, challenges, and submissions.
+`php artisan migrate --seed` fills the application with demo data: 14 teams and about 40 players, 5 competitions (one live, one upcoming, two finished, one draft), 53 challenges with hints and tags, more than 700 submissions spread over time, writeups in Markdown, and notifications.
 
 | Role | Email | Password |
 |---|---|---|
 | Admin | `admin@example.com` | `password` |
-| Player (team member) | `player@example.com` | `password` |
+| Player, captain of Null Pointers | `player@example.com` | `password` |
+| Player, member of Null Pointers | `member@example.com` | `password` |
+| Player without a team | `solo@example.com` | `password` |
+| Player with an unverified email | `unverified@example.com` | `password` |
 
-The seeded challenges use the flags `FLAG{demo_1}` to `FLAG{demo_6}` (the number is the category id). Open a challenge as the player to try submitting one.
+The flag of every challenge is `FLAG{demo_<challenge id>}`, for example `FLAG{demo_1}` for the challenge with id 1. The id is the last number in the address of the challenge page (`/challenges/1`).
 
 ### Pages
 
 | Page | Who |
 |---|---|
-| `/`, `/competitions`, `/competitions/{id}`, `/competitions/{id}/scoreboard`, `/writeups` | everyone |
-| `/register`, `/login` | guests |
-| `/team`, challenge pages, hints, flag submission, writeup forms | signed-in players |
-| `/admin/competitions`, `/admin/challenges` | `admin` only |
+| `/`, `/competitions`, `/competitions/{id}`, `/competitions/{id}/scoreboard`, `/teams`, `/teams/{id}`, `/writeups` | everyone |
+| `/register`, `/login`, `/forgot-password` | guests |
+| `/dashboard`, `/team`, `/profile`, `/notifications`, challenge pages | signed-in players |
+| Registering, flag submission, hints, writeup forms | signed-in players with a verified email |
+| `/admin`, `/admin/competitions`, `/admin/challenges`, `/admin/users`, `/admin/teams`, `/admin/categories`, `/admin/tags` | `admin` only |
 
 ### Running the tests
 
@@ -214,18 +243,21 @@ The feature tests cover authentication, roles, teams, competition registration, 
 ```
 app/Http/Controllers/  Page controllers (Admin/ for the admin area)
 app/Http/Middleware/   Role check for admin pages
-app/Services/      Scoreboard and team participation rules
+app/Services/      Scoreboard, activity feed, and team participation rules
+app/Notifications/ In-app notifications
+config/flagboard.php  Team size and feed settings
 app/Models/        Eloquent models and relationships
 database/
   migrations/      Table definitions
   factories/       Fake data generators
   seeders/         Categories and sample data
-resources/views/   Blade templates
+resources/views/   Blade templates (components/ holds the design system)
+resources/js/      Alpine.js and Chart.js behaviour
 routes/web.php      All routes
 tests/Feature/     Feature tests
 docs/
   database/        ERD and relationship documentation
-  progress/        Phase tracker (P01, P02, ...)
+  progress/        Phase tracker (P01, P02, P03, ...)
 ```
 
 ## Roadmap
@@ -237,6 +269,9 @@ docs/
 - [x] Challenge CRUD and flag submission
 - [x] Hints and scoreboard
 - [x] Writeups
+- [x] Redesign with a playful sky blue and coral look
+- [x] Email verification, password reset, notifications, and user management
+- [x] Competition phases with countdown, live scoreboard with chart, and a full set of demo data
 
 ## Author
 

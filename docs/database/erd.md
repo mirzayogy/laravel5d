@@ -8,6 +8,8 @@ This document describes the database schema of **Flagboard** and every Eloquent 
 erDiagram
     USERS ||--o| PROFILES : "has one"
     TEAMS ||--o{ USERS : "has members"
+    USERS ||--o{ TEAMS : "captains"
+    USERS ||--o{ NOTIFICATIONS : "receives"
     USERS ||--o{ SUBMISSIONS : "makes"
     USERS ||--o{ WRITEUPS : "writes"
 
@@ -44,6 +46,15 @@ erDiagram
         bigint id PK
         string name UK
         string invite_code UK
+        bigint captain_id FK "nullable"
+    }
+    NOTIFICATIONS {
+        uuid id PK
+        string type
+        string notifiable_type
+        bigint notifiable_id
+        text data
+        timestamp read_at "nullable"
     }
     COMPETITIONS {
         bigint id PK
@@ -131,6 +142,8 @@ erDiagram
 | Many-to-Many + pivot data | `Team` ↔ `Challenge` (table `submissions`, columns `is_correct`, `submitted_at`) | `belongsToMany` + `withPivot` |
 | Has-Many-Through | `Competition` → `Submission` through `Challenge` | `hasManyThrough` |
 | Has-Many-Through | `Category` → `Submission` through `Challenge` | `hasManyThrough` |
+| One-to-Many | `User` → `Team` (as captain, `teams.captain_id`) | `belongsTo` (`Team::captain`) |
+| Polymorphic | `User` → `Notification` (Laravel `notifications` table) | `Notifiable` trait |
 
 `submissions` is both a table with its own `id` and the link between `Team` and `Challenge`. It is modelled as an Eloquent model (`Submission`) for the one-to-many relationships, and the `Team` ↔ `Challenge` many-to-many relationship points to the same table.
 
@@ -155,4 +168,7 @@ The `categories` table is populated by a seeder with the six built-in categories
 - **One correct submission per team per challenge** is enforced in application logic (validation before insert), because a partial unique index is not portable across MySQL and SQLite.
 - **Team membership:** `users.team_id` is nullable, so a player can exist without a team. A user belongs to at most one team.
 - **Score** is computed, not stored: sum of `challenges.points` for correct submissions, minus sum of `hints.cost` for rows in `hint_unlocks`.
-- **Cascade rules (planned):** deleting a competition cascades to its challenges and registrations; deleting a challenge cascades to its hints, tags, unlocks, submissions, and writeups; deleting a team sets `users.team_id` to null and cascades to its registrations, unlocks, and submissions. Deleting a category is restricted while challenges still use it.
+- **Cascade rules (planned):** deleting a competition cascades to its challenges and registrations; deleting a challenge cascades to its hints, tags, unlocks, submissions, and writeups; deleting a team sets `users.team_id` to null and cascades to its registrations, unlocks, and submissions. Deleting a category is restricted while challenges still use it.- **Captain:** `teams.captain_id` points to the team's captain and is set to null when that user is deleted. The creator of a team is its first captain. When the captain leaves, the next member becomes captain.
+- **Team size:** the maximum number of members is `config('flagboard.team_size')` (4 by default).
+- **Notifications:** in-app notifications use Laravel's database channel and the standard `notifications` table.
+- **Competition phase:** `competitions.status` stays `draft`, `running`, or `finished`. The phase players see (`draft`, `upcoming`, `running`, `finished`) is computed from the status and from `start_at` and `end_at`, so no scheduled job is needed.
