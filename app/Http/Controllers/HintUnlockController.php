@@ -18,7 +18,7 @@ class HintUnlockController extends Controller
         $competition = $challenge->competition;
 
         abort_unless($challenge->is_published, 404);
-        abort_if($competition->status === 'draft', 404);
+        abort_if($competition->isDraft(), 404);
 
         $team = $this->contest->participatingTeam($request->user(), $competition);
 
@@ -26,7 +26,7 @@ class HintUnlockController extends Controller
             return back()->with('error', 'Your team is not registered in this competition.');
         }
 
-        if ($competition->status !== 'running') {
+        if (! $competition->isRunning()) {
             return back()->with('error', 'This competition is not running.');
         }
 

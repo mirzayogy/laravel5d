@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Challenge;
 use App\Models\Submission;
+use App\Notifications\AppNotification;
 use App\Services\ContestService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,20 +20,21 @@ class SubmissionController extends Controller
         $competition = $challenge->competition;
 
         abort_unless($challenge->is_published, 404);
-        abort_if($competition->status === 'draft', 404);
+        abort_if($competition->isDraft(), 404);
 
         $data = $request->validate([
             'flag' => ['required', 'string', 'max:255'],
         ]);
 
-        $team = $this->contest->participatingTeam($request->user(), $competition);
+        $user = $request->user();
+        $team = $this->contest->participatingTeam($user, $competition);
 
         if (! $team) {
             return back()->with('error', 'Your team is not registered in this competition.');
         }
 
-        if ($competition->status !== 'running') {
-            return back()->with('error', 'This competition is not running.');
+        if (! $competition->isRunning()) {
+            return back()->with('error', 'This competition is not running, so submissions are closed.');
         }
 
         if ($this->contest->hasSolved($team, $challenge)) {
@@ -44,15 +46,25 @@ class SubmissionController extends Controller
         Submission::create([
             'team_id' => $team->id,
             'challenge_id' => $challenge->id,
-            'user_id' => $request->user()->id,
+            'user_id' => $user->id,
             'is_correct' => $correct,
             'submitted_at' => now(),
         ]);
 
-        if ($correct) {
-            return back()->with('success', 'Correct flag. Your team earned '.$challenge->points.' points.');
+        if (! $correct) {
+            return back()->with('error', 'Wrong flag. Take a breath and try again.');
         }
 
-        return back()->with('error', 'Wrong flag. Try again.');
+        $firstBlood = Submission::where('challenge_id', $challenge->id)->where('is_correct', true)->count() === 1;
+
+        $team->users()->whereKeyNot($user->id)->get()->each(fn ($mate) => $mate->notify(new AppNotification(
+            $firstBlood ? 'First blood!' : 'Your team scored',
+            $user->name.' solved '.$challenge->title.' (+'.$challenge->points.' points).',
+            route('challenges.show', $challenge),
+            $firstBlood ? 'zap' : 'check-circle',
+            $firstBlood ? 'coral' : 'green',
+        )));
+
+        return back()->with('success', ($firstBlood ? 'First blood! ' : 'Correct flag. ').'Your team earned '.$challenge->points.' points.');
     }
 }
