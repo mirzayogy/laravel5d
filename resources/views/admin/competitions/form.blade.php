@@ -3,56 +3,53 @@
 @section('title', $competition ? 'Edit competition' : 'New competition')
 
 @section('content')
-    <h1 class="text-2xl font-semibold">{{ $competition ? 'Edit competition' : 'New competition' }}</h1>
+    <x-page-header :title="$competition ? 'Edit competition' : 'New competition'" icon="flag"
+                   :crumbs="['Admin' => route('admin.dashboard'), 'Competitions' => route('admin.competitions.index'), ($competition ? 'Edit' : 'New') => null]" />
 
-    <form method="POST"
-          action="{{ $competition ? route('admin.competitions.update', $competition) : route('admin.competitions.store') }}"
-          class="mt-4 max-w-xl space-y-4">
-        @csrf
-        @if ($competition)
-            @method('PUT')
-        @endif
+    <div class="grid gap-6 lg:grid-cols-3">
+        <x-card class="lg:col-span-2">
+            <form method="POST" action="{{ $competition ? route('admin.competitions.update', $competition) : route('admin.competitions.store') }}" class="space-y-4">
+                @csrf
+                @if ($competition)
+                    @method('PUT')
+                @endif
 
-        <div>
-            <label for="title" class="block text-sm font-medium">Title</label>
-            <input id="title" name="title" type="text" value="{{ old('title', $competition?->title) }}" required
-                   class="mt-1 w-full rounded border border-slate-300 px-3 py-2">
+                <x-input name="title" label="Title" :value="$competition?->title" required />
+                <x-input name="slug" label="Slug (optional)" :value="$competition?->slug" hint="Leave empty to generate it from the title." class="font-mono" />
+                <x-textarea name="description" label="Description (Markdown)" :value="$competition?->description" rows="6" />
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <x-input name="start_at" type="datetime-local" label="Start" :value="$competition?->start_at?->format('Y-m-d\TH:i')" required />
+                    <x-input name="end_at" type="datetime-local" label="End" :value="$competition?->end_at?->format('Y-m-d\TH:i')" required />
+                </div>
+                <x-select name="status" label="Status">
+                    @foreach (['draft' => 'Draft (hidden from players)', 'running' => 'Published (starts and ends automatically by time)', 'finished' => 'Ended early (closed now)'] as $value => $label)
+                        <option value="{{ $value }}" @selected(old('status', $competition?->status ?? 'draft') === $value)>{{ $label }}</option>
+                    @endforeach
+                </x-select>
+                <div class="flex flex-wrap gap-2">
+                    <x-button type="submit" icon="check">Save competition</x-button>
+                    <x-button :href="route('admin.competitions.index')" variant="ghost">Cancel</x-button>
+                </div>
+            </form>
+        </x-card>
+
+        <div class="space-y-6">
+            <x-card tone="sky">
+                <h2 class="font-extrabold">How phases work</h2>
+                <ul class="mt-2 space-y-2 text-sm text-slate-700">
+                    <li class="flex gap-2"><x-badge tone="amber">Draft</x-badge> Only admins can see it.</li>
+                    <li class="flex gap-2"><x-badge tone="sky">Upcoming</x-badge> Published, before the start. Teams can register.</li>
+                    <li class="flex gap-2"><x-badge tone="green">Live</x-badge> Between start and end. Flags are accepted.</li>
+                    <li class="flex gap-2"><x-badge tone="slate">Finished</x-badge> After the end, or ended early.</li>
+                </ul>
+            </x-card>
+            @if ($competition)
+                <x-card>
+                    <h2 class="font-extrabold">Current phase</h2>
+                    <div class="mt-2"><x-phase-badge :phase="$competition->phase" class="text-sm" /></div>
+                    <x-button :href="route('admin.challenges.index', ['competition' => $competition->id])" size="sm" variant="soft" class="mt-3" icon="target">Manage its challenges</x-button>
+                </x-card>
+            @endif
         </div>
-        <div>
-            <label for="slug" class="block text-sm font-medium">Slug (optional)</label>
-            <input id="slug" name="slug" type="text" value="{{ old('slug', $competition?->slug) }}"
-                   class="mt-1 w-full rounded border border-slate-300 px-3 py-2 font-mono">
-        </div>
-        <div>
-            <label for="description" class="block text-sm font-medium">Description</label>
-            <textarea id="description" name="description" rows="4"
-                      class="mt-1 w-full rounded border border-slate-300 px-3 py-2">{{ old('description', $competition?->description) }}</textarea>
-        </div>
-        <div class="grid gap-4 sm:grid-cols-2">
-            <div>
-                <label for="start_at" class="block text-sm font-medium">Start</label>
-                <input id="start_at" name="start_at" type="datetime-local" required
-                       value="{{ old('start_at', $competition?->start_at?->format('Y-m-d\TH:i')) }}"
-                       class="mt-1 w-full rounded border border-slate-300 px-3 py-2">
-            </div>
-            <div>
-                <label for="end_at" class="block text-sm font-medium">End</label>
-                <input id="end_at" name="end_at" type="datetime-local" required
-                       value="{{ old('end_at', $competition?->end_at?->format('Y-m-d\TH:i')) }}"
-                       class="mt-1 w-full rounded border border-slate-300 px-3 py-2">
-            </div>
-        </div>
-        <div>
-            <label for="status" class="block text-sm font-medium">Status</label>
-            <select id="status" name="status" class="mt-1 rounded border border-slate-300 px-3 py-2">
-                @foreach (['draft', 'running', 'finished'] as $status)
-                    <option value="{{ $status }}" @selected(old('status', $competition?->status ?? 'draft') === $status)>{{ $status }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="flex gap-3">
-            <button type="submit" class="rounded bg-indigo-600 px-3 py-2 text-sm text-white hover:bg-indigo-500">Save</button>
-            <a href="{{ route('admin.competitions.index') }}" class="rounded border border-slate-300 px-3 py-2 text-sm hover:bg-slate-100">Cancel</a>
-        </div>
-    </form>
+    </div>
 @endsection

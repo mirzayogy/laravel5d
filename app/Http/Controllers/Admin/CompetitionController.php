@@ -12,13 +12,19 @@ use Illuminate\View\View;
 
 class CompetitionController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $competitions = Competition::withCount(['challenges', 'teams'])
-            ->orderByDesc('start_at')
-            ->get();
+        $search = trim((string) $request->query('q'));
+        $status = $request->query('status');
 
-        return view('admin.competitions.index', compact('competitions'));
+        $competitions = Competition::withCount(['challenges', 'teams'])
+            ->when($search !== '', fn ($query) => $query->where('title', 'like', '%'.$search.'%'))
+            ->when(in_array($status, ['draft', 'running', 'finished'], true), fn ($query) => $query->where('status', $status))
+            ->orderByDesc('start_at')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('admin.competitions.index', compact('competitions', 'search', 'status'));
     }
 
     public function create(): View

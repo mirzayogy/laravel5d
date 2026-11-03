@@ -3,24 +3,61 @@
 @section('title', $writeup->title)
 
 @section('content')
-    <a href="{{ route('writeups.index') }}" class="text-sm text-indigo-700 underline">Back to writeups</a>
+    <x-page-header :title="$writeup->title" icon="file-text" :crumbs="['Writeups' => route('writeups.index'), $writeup->title => null]">
+        <x-slot:actions>
+            @if ($writeup->status === 'draft')<x-badge tone="amber" class="text-sm">Draft, only you can see it</x-badge>@endif
+            @if ($isAuthor)
+                <x-button :href="route('writeups.edit', $writeup)" variant="ghost" size="sm" icon="edit">Edit</x-button>
+                <form method="POST" action="{{ route('writeups.destroy', $writeup) }}" onsubmit="return confirm('Delete this writeup?')">
+                    @csrf
+                    @method('DELETE')
+                    <x-button type="submit" variant="danger" size="sm" icon="trash">Delete</x-button>
+                </form>
+            @endif
+        </x-slot:actions>
+    </x-page-header>
 
-    <div class="mt-2 flex items-center justify-between">
-        <h1 class="text-2xl font-semibold">{{ $writeup->title }}</h1>
-        <span class="rounded-full px-2 py-0.5 text-xs {{ $writeup->status === 'published' ? 'bg-green-100 text-green-800' : 'bg-slate-200 text-slate-700' }}">{{ $writeup->status }}</span>
-    </div>
-    <p class="mt-1 text-sm text-slate-500">by {{ $writeup->user->name }} on {{ $writeup->challenge->title }}</p>
+    <div class="grid gap-6 lg:grid-cols-3">
+        <x-card class="lg:col-span-2">
+            <div class="md">{!! $html !!}</div>
+        </x-card>
 
-    <div class="mt-4 whitespace-pre-line rounded border border-slate-200 bg-white p-4">{{ $writeup->content }}</div>
+        <div class="space-y-6">
+            <x-card>
+                <div class="flex items-center gap-3">
+                    <x-avatar :name="$writeup->user->name" size="lg" />
+                    <div class="min-w-0">
+                        <div class="truncate font-extrabold">{{ $writeup->user->name }}</div>
+                        <div class="truncate text-xs text-slate-500">{{ $writeup->user->profile?->institution ?? 'Flagboard player' }}</div>
+                    </div>
+                </div>
+                @if ($writeup->user->profile?->bio)<p class="mt-3 text-sm text-slate-600">{{ $writeup->user->profile->bio }}</p>@endif
+                <div class="mt-3 text-xs text-slate-400">Published {{ $writeup->created_at->diffForHumans() }}</div>
+            </x-card>
 
-    @if ($isAuthor)
-        <div class="mt-4 flex gap-3">
-            <a href="{{ route('writeups.edit', $writeup) }}" class="rounded border border-slate-300 px-3 py-1 text-sm hover:bg-slate-100">Edit</a>
-            <form method="POST" action="{{ route('writeups.destroy', $writeup) }}">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="rounded border border-red-300 px-3 py-1 text-sm text-red-700 hover:bg-red-50">Delete</button>
-            </form>
+            <x-card tone="sky">
+                <h2 class="font-extrabold">About the challenge</h2>
+                <div class="mt-2 flex flex-wrap gap-1.5">
+                    <x-category-badge :name="$writeup->challenge->category->name" />
+                    <x-difficulty :level="$writeup->challenge->difficulty" />
+                </div>
+                <div class="mt-2 font-bold">{{ $writeup->challenge->title }}</div>
+                <div class="text-xs text-slate-500">{{ $writeup->challenge->competition->title }}, {{ $writeup->challenge->points }} points</div>
+            </x-card>
+
+            @if ($more->isNotEmpty())
+                <x-card>
+                    <h2 class="font-extrabold">More writeups for this challenge</h2>
+                    <ul class="mt-2 divide-y divide-sky-50">
+                        @foreach ($more as $other)
+                            <li class="py-2 text-sm">
+                                <a href="{{ route('writeups.show', $other) }}" class="font-semibold hover:text-sky-700">{{ $other->title }}</a>
+                                <div class="text-xs text-slate-500">by {{ $other->user->name }}</div>
+                            </li>
+                        @endforeach
+                    </ul>
+                </x-card>
+            @endif
         </div>
-    @endif
+    </div>
 @endsection

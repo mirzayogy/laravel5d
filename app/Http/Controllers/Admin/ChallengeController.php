@@ -10,18 +10,40 @@ use App\Models\Tag;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class ChallengeController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $challenges = Challenge::with(['competition', 'category'])
-            ->latest()
-            ->paginate(15);
+        $search = trim((string) $request->query('q'));
+        $published = $request->query('published');
 
-        return view('admin.challenges.index', compact('challenges'));
+        $challenges = Challenge::with(['competition', 'category'])
+            ->withCount(['hints', 'submissions as solves_count' => fn ($query) => $query->where('is_correct', true)])
+            ->when($search !== '', fn ($query) => $query->where('title', 'like', '%'.$search.'%'))
+            ->when($request->query('competition'), fn ($query, $id) => $query->where('competition_id', (int) $id))
+            ->when($request->query('category'), fn ($query, $id) => $query->where('category_id', (int) $id))
+            ->when(in_array($request->query('difficulty'), ['easy', 'medium', 'hard'], true), fn ($query) => $query->where('difficulty', $request->query('difficulty')))
+            ->when(in_array($published, ['0', '1'], true), fn ($query) => $query->where('is_published', $published === '1'))
+            ->orderByDesc('id')
+            ->paginate(12)
+            ->withQueryString();
+
+        return view('admin.challenges.index', [
+            'challenges' => $challenges,
+            'competitions' => Competition::orderBy('title')->get(),
+            'categories' => Category::orderBy('name')->get(),
+            'filters' => [
+                'q' => $search,
+                'competition' => $request->query('competition'),
+                'category' => $request->query('category'),
+                'difficulty' => $request->query('difficulty'),
+                'published' => $published,
+            ],
+        ]);
     }
 
     public function create(): View
@@ -46,7 +68,7 @@ class ChallengeController extends Controller
 
         $this->syncTags($challenge, $request);
 
-        return redirect()->route('admin.challenges.edit', $challenge)->with('success', 'Challenge created.');
+        return redirect()->route('admin.challenges.edit', $challenge)->with('success', 'Challenge created. You can add hints below.');
     }
 
     public function edit(Challenge $challenge): View
@@ -112,7 +134,7 @@ class ChallengeController extends Controller
         $ids = array_map('intval', $request->input('tag_ids', []));
 
         $names = collect(explode(',', (string) $request->input('new_tags')))
-            ->map(fn (string $name) => trim($name))
+            ->map(fn (string $name) => Str::lower(trim($name)))
             ->filter()
             ->unique();
 
