@@ -6,4 +6,151 @@
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Flagboard palette: sky blue for structure, coral for energy. */
+    --color-coral-50: #fff4f1;
+    --color-coral-100: #ffe5de;
+    --color-coral-200: #ffcbbe;
+    --color-coral-300: #ffa894;
+    --color-coral-400: #ff8366;
+    --color-coral-500: #ff6b4a;
+    --color-coral-600: #f04e2c;
+    --color-coral-700: #c93a1d;
+    --color-coral-800: #a0321c;
+    --color-coral-900: #82301d;
+
+    --color-canvas: #f2f9ff;
+
+    --animate-float: float 7s ease-in-out infinite;
+    --animate-wiggle: wiggle 0.9s ease-in-out;
+    --animate-pop: pop 0.35s ease-out;
+
+    @keyframes float {
+        0%,
+        100% {
+            transform: translateY(0) rotate(0deg);
+        }
+        50% {
+            transform: translateY(-10px) rotate(2deg);
+        }
+    }
+
+    @keyframes wiggle {
+        0%,
+        100% {
+            transform: rotate(0deg);
+        }
+        25% {
+            transform: rotate(-6deg);
+        }
+        75% {
+            transform: rotate(6deg);
+        }
+    }
+
+    @keyframes pop {
+        0% {
+            transform: scale(0.92);
+            opacity: 0;
+        }
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+}
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    ::selection {
+        background: var(--color-coral-200);
+        color: var(--color-coral-900);
+    }
+
+    :focus-visible {
+        outline: 3px solid var(--color-sky-400);
+        outline-offset: 2px;
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+}
+
+/* Markdown content (challenge descriptions and writeups). */
+@layer components {
+    .md {
+        @apply text-[15px] leading-relaxed text-slate-700;
+    }
+
+    .md > * + * {
+        @apply mt-3;
+    }
+
+    .md h1,
+    .md h2,
+    .md h3,
+    .md h4 {
+        @apply font-bold tracking-tight text-slate-900;
+    }
+
+    .md h1 {
+        @apply mt-6 text-xl;
+    }
+
+    .md h2 {
+        @apply mt-5 text-lg;
+    }
+
+    .md h3,
+    .md h4 {
+        @apply mt-4 text-base;
+    }
+
+    .md a {
+        @apply font-medium text-sky-700 underline decoration-sky-300 underline-offset-2 hover:text-sky-900;
+    }
+
+    .md ul {
+        @apply list-disc space-y-1 pl-5;
+    }
+
+    .md ol {
+        @apply list-decimal space-y-1 pl-5;
+    }
+
+    .md blockquote {
+        @apply rounded-r-2xl border-l-4 border-coral-300 bg-coral-50 px-4 py-2 text-coral-900;
+    }
+
+    .md code {
+        @apply rounded-md bg-sky-50 px-1.5 py-0.5 font-mono text-[13px] text-sky-800;
+    }
+
+    .md pre {
+        @apply overflow-x-auto rounded-2xl bg-slate-900 p-4 text-slate-100;
+    }
+
+    .md pre code {
+        @apply bg-transparent p-0 text-[13px] text-slate-100;
+    }
+
+    .md hr {
+        @apply border-sky-100;
+    }
+
+    .md table {
+        @apply w-full text-sm;
+    }
+
+    .md th {
+        @apply border-b-2 border-sky-100 px-2 py-1 text-left font-semibold;
+    }
+
+    .md td {
+        @apply border-b border-sky-50 px-2 py-1;
+    }
 }
