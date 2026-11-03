@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Profile;
 use App\Models\User;
+use App\Notifications\AppNotification;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -33,10 +35,21 @@ class AuthController extends Controller
 
         Profile::create(['user_id' => $user->id]);
 
+        $user->notify(new AppNotification(
+            'Welcome to Flagboard',
+            'Create or join a team, then register for a competition.',
+            route('team.show'),
+            'flag',
+            'sky',
+        ));
+
+        event(new Registered($user));
+
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('home')->with('success', 'Welcome to Flagboard.');
+        return redirect()->route('dashboard')
+            ->with('success', 'Welcome to Flagboard. We sent a link to '.$user->email.' to verify your email.');
     }
 
     public function showLogin(): View
@@ -59,7 +72,7 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('home'));
+        return redirect()->intended(route('dashboard'));
     }
 
     public function logout(Request $request): RedirectResponse
