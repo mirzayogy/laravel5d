@@ -16,7 +16,7 @@ class AuthTest extends FlagboardTestCase
             'password_confirmation' => 'secret-pass',
         ]);
 
-        $response->assertRedirect(route('home'));
+        $response->assertRedirect(route('dashboard'));
         $this->assertAuthenticated();
         $this->assertDatabaseHas('users', ['email' => 'dhea@example.com', 'role' => 'player']);
 
@@ -42,7 +42,7 @@ class AuthTest extends FlagboardTestCase
         $user = User::factory()->create();
 
         $this->post(route('login'), ['email' => $user->email, 'password' => 'password'])
-            ->assertRedirect(route('home'));
+            ->assertRedirect(route('dashboard'));
         $this->assertAuthenticatedAs($user);
 
         $this->post(route('logout'))->assertRedirect(route('home'));

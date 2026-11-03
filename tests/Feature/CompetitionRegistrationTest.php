@@ -7,15 +7,15 @@ use Tests\FlagboardTestCase;
 
 class CompetitionRegistrationTest extends FlagboardTestCase
 {
-    public function test_the_home_page_lists_running_competitions_only(): void
+    public function test_the_home_page_lists_running_competitions_and_hides_drafts(): void
     {
         $running = $this->makeCompetition('running');
-        $finished = $this->makeCompetition('finished');
+        $draft = $this->makeCompetition('draft');
 
         $this->get(route('home'))
             ->assertOk()
             ->assertSee($running->title)
-            ->assertDontSee($finished->title);
+            ->assertDontSee($draft->title);
     }
 
     public function test_a_draft_competition_is_hidden(): void
