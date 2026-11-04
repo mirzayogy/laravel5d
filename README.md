@@ -1,58 +1,214 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# ProtoLog
 
-## About Laravel
+**Engineering Experiment Journal for Robotics, Embedded Systems, and IoT.**
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+ProtoLog is a Laravel-based application prototype designed to help engineers and experimenters document their development projects, manage component inventories, record experiments, and organize measurement results.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+The system provides a structured workspace for documenting engineering activities, from project planning and component usage to experiment execution and result reporting.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Project Overview
 
-## Learning Laravel
+ProtoLog focuses on organizing engineering experiments through connected database records.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Its main capabilities are:
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- **Project Management** — organize engineering projects by domain, objective, and status.
+- **Component Inventory** — record reusable electronic components, modules, and hardware specifications.
+- **Experiment Management** — document experiment objectives, hypotheses, procedures, and notes.
+- **Component Tracking** — record which components are used in each experiment, including their roles and connection details.
+- **Experiment Runs** — record individual experiment executions, firmware versions, and environmental conditions.
+- **Measurement Recording** — define measurement parameters and store sample results with their units and timestamps.
+- **Experiment Reports** — organize experiment summaries, conclusions, limitations, and recommendations.
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## Technology Stack
 
-## Agentic Development
+- **Backend:** Laravel
+- **Programming Language:** PHP
+- **Database:** MySQL
+- **ORM:** Laravel Eloquent
+- **Frontend Tooling:** Vite and npm
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Installation and Setup
+
+### 1. Clone the repository
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone <repository-url>
+cd <repository-folder>
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2. Install dependencies
 
-## Contributing
+```bash
+composer install
+npm install
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 3. Configure environment
 
-## Code of Conduct
+For Windows PowerShell:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```powershell
+Copy-Item .env.example .env
+```
 
-## Security Vulnerabilities
+For macOS or Linux:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+cp .env.example .env
+```
 
-## License
+Generate the application key:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+php artisan key:generate
+```
+
+### 4. Configure the database
+
+Create a MySQL database, then update the database configuration in `.env`.
+
+Example:
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=protolog
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+Adjust the database credentials according to your local environment.
+
+### 5. Run migrations and seeders
+
+```bash
+php artisan migrate --seed
+```
+
+This command creates the database tables and executes the registered seeders:
+
+- `PeriodeSeeder` — existing application seed data.
+- `ProtoLogSeeder` — sample data for ProtoLog.
+
+To execute the ProtoLog seeder separately:
+
+```bash
+php artisan db:seed --class=ProtoLogSeeder
+```
+
+### 6. Run the application
+
+Start the Vite development server:
+
+```bash
+npm run dev
+```
+
+In another terminal, start Laravel:
+
+```bash
+php artisan serve
+```
+
+Open the local address displayed by Laravel, usually:
+
+`http://127.0.0.1:8000`
+
+## Database Structure
+
+ProtoLog introduces eight domain tables:
+
+| Table | Description |
+|---|---|
+| `projects` | Stores project information and ownership. |
+| `components` | Stores the user's component inventory. |
+| `experiments` | Stores experiments belonging to projects. |
+| `experiment_components` | Records component usage within experiments. |
+| `experiment_runs` | Stores individual experiment executions. |
+| `measurement_parameters` | Defines the parameters measured in experiments. |
+| `measurement_records` | Stores measurement samples and results. |
+| `experiment_reports` | Stores experiment summaries and conclusions. |
+
+Existing Laravel tables and the `periode` table are retained.
+
+### Entity Relationships
+
+The database uses the following Eloquent relationships:
+
+- **User → Project:** One-to-Many.
+- **User → Component:** One-to-Many.
+- **Project → Experiment:** One-to-Many.
+- **Project → ExperimentRun:** Has-Many-Through.
+- **Experiment ↔ Component:** Many-to-Many through `experiment_components`.
+- **Experiment → ExperimentRun:** One-to-Many.
+- **Experiment → MeasurementParameter:** One-to-Many.
+- **Experiment → ExperimentReport:** One-to-One.
+- **ExperimentRun → MeasurementRecord:** One-to-Many.
+- **MeasurementParameter → MeasurementRecord:** One-to-Many.
+- **Component → MeasurementParameter:** One-to-Many through the optional `source_component_id` reference.
+
+The complete entity relationship diagram is available at:
+
+[`docs/database/erd.md`](docs/database/erd.md)
+
+## Database Integrity
+
+The database implements:
+
+- Foreign key constraints to maintain referential integrity.
+- Cascading deletion for dependent records where appropriate.
+- Restricted deletion for components referenced by experiment usage or measurement parameters.
+- Unique constraints for experiment-component associations.
+- Unique experiment run numbers within each experiment.
+- Unique measurement samples for each run and parameter combination.
+- A unique experiment reference for each report.
+
+Some cross-table business rules, such as verifying that a component belongs to the same user as its project's owner, require additional application-layer validation.
+
+## Sample Data
+
+`ProtoLogSeeder` provides repeatable sample data for database development and relationship verification.
+
+The sample dataset includes:
+
+- 1 demo user.
+- 1 engineering project.
+- 2 inventory components.
+- 1 experiment.
+- 2 experiment-component associations.
+- 1 experiment run.
+- 2 measurement parameters.
+- 2 measurement records.
+- 1 experiment report.
+
+The sample measurement values are demonstration data, not results from an actual physical experiment.
+
+The demo user is created with:
+
+- Email: `demo@protolog.local`
+- Development password: `password`
+
+Do not use these demo credentials in a production environment.
+
+## Project Documentation
+
+| Document | Location |
+|---|---|
+| Entity Relationship Diagram | `docs/database/erd.md` |
+| Assignment Progress | `docs/progress/P01-database-design.md` |
+| Database Migrations | `database/migrations/` |
+| Eloquent Models | `app/Models/` |
+| Database Seeders | `database/seeders/` |
+
+## Current Development Scope
+
+This phase focuses on database design, migrations, Eloquent models, relationships, and sample data.
+
+Actual hardware integration, automated sensor data collection, and application-level experiment management features are outside the scope of this database foundation phase.
+
+---
+
+**ProtoLog** — A structured journal for engineering experiments.
