@@ -22,6 +22,8 @@ Design and implement the database of **Toko Online Mini** with Eloquent relation
 | J4 | Seeder | ✅ Done | 2026-11-01 | [TokoOnlineSeeder.php](https://github.com/nrhyti/laravel5d/blob/feature/p01-database-design/database/seeders/TokoOnlineSeeder.php) |
 | J5 | Sync with upstream | ✅ Done | 2026-11-04 | [commit 6dd8069](https://github.com/nrhyti/laravel5d/commit/6dd8069) |
 | J6 | README | ✅ Done | 2026-11-04 | [README.md](https://github.com/nrhyti/laravel5d/blob/feature/p01-database-design/README.md), [commit 72a955a](https://github.com/nrhyti/laravel5d/commit/72a955a) |
+| J7 | Factories | ✅ Done | 2026-11-04 | [factories](https://github.com/nrhyti/laravel5d/tree/feature/p01-database-design/database/factories), [commit edf2070](https://github.com/nrhyti/laravel5d/commit/edf2070) |
+| J8 | Read-only pages (dashboard, products, orders) | ✅ Done | 2026-11-04 | [views](https://github.com/nrhyti/laravel5d/tree/feature/p01-database-design/resources/views), [commit b5de33b](https://github.com/nrhyti/laravel5d/commit/b5de33b) |
 
 **Status legend:** ⏳ Planned · 🚧 In progress · ✅ Done · ⛔ Blocked
 
@@ -74,7 +76,6 @@ Design and implement the database of **Toko Online Mini** with Eloquent relation
 - **Status:** ✅ Done, 2026-11-01
 - **What:** `TokoOnlineSeeder` creates 3 categories, 6 products, 2 users with profiles, and 2 orders with items. Order totals are calculated from the items. `DatabaseSeeder` calls `PeriodeSeeder` (from the lecturer) and `TokoOnlineSeeder`.
 - **Proof:** [seeders](https://github.com/nrhyti/laravel5d/tree/feature/p01-database-design/database/seeders)
-- **Not done:** factories for the new models.
 
 ### J5: Sync with upstream
 
@@ -88,6 +89,26 @@ Design and implement the database of **Toko Online Mini** with Eloquent relation
 - **Status:** ✅ Done, 2026-11-04
 - **What:** Rewrote the README so it matches the implemented schema: features, ERD, relationship table, database rules, setup steps, and roadmap.
 - **Proof:** [README.md](https://github.com/nrhyti/laravel5d/blob/feature/p01-database-design/README.md), [commit 72a955a](https://github.com/nrhyti/laravel5d/commit/72a955a)
+
+### J7: Factories
+
+- **Status:** ✅ Done, 2026-11-04
+- **What:** Added `HasFactory` to `Category`, `Product`, `UserProfile`, and `Order`, and created a factory for each of them. Foreign keys are created through nested factories (for example `Product` creates its own `Category`).
+- **Proof:** [factories](https://github.com/nrhyti/laravel5d/tree/feature/p01-database-design/database/factories), [commit edf2070](https://github.com/nrhyti/laravel5d/commit/edf2070)
+- **Verified:** in tinker, `Product::factory()->count(3)->create()` creates 3 products and `UserProfile::factory()->create()` creates a profile together with its user.
+
+### J8: Read-only pages
+
+- **Status:** ✅ Done, 2026-11-04
+- **What:** A shared layout (`layouts/app.blade.php`) and three pages served by `TokoController`: Dashboard (`/`), Products (`/produk`), and Orders (`/pesanan`). The pages only read data and show the relationships working: category per product, buyer profile per order, and order items from the pivot table. The shared layout will be reused for the AdminLTE template in Assignment 2.
+- **Proof:** [TokoController.php](https://github.com/nrhyti/laravel5d/blob/feature/p01-database-design/app/Http/Controllers/TokoController.php), [views](https://github.com/nrhyti/laravel5d/tree/feature/p01-database-design/resources/views), [commit b5de33b](https://github.com/nrhyti/laravel5d/commit/b5de33b)
+- **Verified:** with `php artisan serve` after `migrate:fresh --seed`.
+
+![dashboard](img/view-dashboard.png)
+
+![products](img/view-produk.png)
+
+![orders](img/view-pesanan.png)
 
 ---
 
@@ -113,5 +134,4 @@ App\Models\User::first()->orderItems->count(); // 2
 
 ## Next
 
-- Factories for the new models.
-- P02: CRUD Periode with the AdminLTE template (Assignment 2), in its own file `P02-crud-periode.md`.
+- P02: CRUD Periode (Assignment 2), reusing `layouts/app.blade.php`. Details will be in `P02-crud-periode.md`.

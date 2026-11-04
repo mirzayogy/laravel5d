@@ -8,6 +8,7 @@ Toko Online Mini adalah aplikasi web e-commerce sederhana yang dibangun dengan *
 - Profil tambahan untuk setiap pengguna (telepon, alamat, kota)
 - Pemesanan: satu pesanan berisi satu atau lebih produk lengkap dengan jumlah dan harga
 - Harga produk disimpan pada setiap item pesanan sebagai harga saat transaksi
+- Halaman dashboard, produk, dan pesanan (baca saja)
 
 ## Desain Basis Data
 
@@ -113,7 +114,7 @@ docs/progress/     Laporan progress per fase
 
 - [x] Perancangan dan dokumentasi basis data
 - [x] Migration, model, dan seeder
-- [ ] Factory
+- [x] Factory
 - [ ] CRUD Periode dengan template AdminLTE (Assignment 2)
 
 ## Penulis
