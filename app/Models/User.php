@@ -7,8 +7,9 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;   // tambahan
-use Illuminate\Database\Eloquent\Relations\HasOne;    // tambahan
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -32,7 +33,7 @@ class User extends Authenticatable
         ];
     }
 
-/** One-to-one: satu user punya satu profil. */
+    /** One-to-one: satu user punya satu profil. */
     public function profile(): HasOne
     {
         return $this->hasOne(UserProfile::class);
@@ -42,5 +43,11 @@ class User extends Authenticatable
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    /** Has-many-through: user -> orders -> order_items. */
+    public function orderItems(): HasManyThrough
+    {
+        return $this->hasManyThrough(OrderItem::class, Order::class);
     }
 }
