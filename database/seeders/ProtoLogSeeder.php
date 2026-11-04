@@ -1,0 +1,184 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\User;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+
+class ProtoLogSeeder extends Seeder
+{
+    public function run(): void
+    {
+        DB::transaction(function () {
+            // 1. Create a demo user.
+            $user = User::firstOrCreate(
+                ['email' => 'demo@protolog.local'],
+                [
+                    'name' => 'ProtoLog Demo',
+                    'password' => Hash::make('password'),
+                ]
+            );
+
+            // 2. Create a demo project.
+            $project = $user->projects()->updateOrCreate(
+                ['name' => 'ESP32 Environmental Monitoring'],
+                [
+                    'domain' => 'IoT & Embedded Systems',
+                    'objective' => 'Develop a system to monitor temperature and humidity using ESP32.',
+                    'description' => 'A demo project for recording embedded system experiments.',
+                    'status' => 'completed',
+                    'started_on' => '2026-11-04',
+                    'completed_on' => '2026-11-04',
+                ]
+            );
+
+            // 3. Create components in the user's inventory.
+            $esp32 = $user->components()->updateOrCreate(
+                ['name' => 'ESP32 DevKit V1'],
+                [
+                    'category' => 'Microcontroller',
+                    'manufacturer' => 'Espressif',
+                    'model' => 'ESP32 DevKit V1',
+                    'interface' => 'GPIO, Wi-Fi, Bluetooth',
+                    'specifications' => [
+                        'operating_voltage' => '3.3V',
+                        'processor' => 'Xtensa Dual-Core',
+                    ],
+                    'quantity_owned' => 1,
+                    'storage_location' => 'Demo Inventory',
+                    'notes' => 'Main controller for the demo experiment.',
+                ]
+            );
+
+            $sensor = $user->components()->updateOrCreate(
+                ['name' => 'DHT22'],
+                [
+                    'category' => 'Sensor',
+                    'manufacturer' => 'Aosong',
+                    'model' => 'DHT22',
+                    'interface' => 'Digital',
+                    'specifications' => [
+                        'temperature_range' => '-40 to 80 °C',
+                        'humidity_range' => '0 to 100 %RH',
+                    ],
+                    'quantity_owned' => 1,
+                    'storage_location' => 'Demo Inventory',
+                    'notes' => 'Temperature and humidity sensor.',
+                ]
+            );
+
+            // 4. Create an experiment under the project.
+            $experiment = $project->experiments()->updateOrCreate(
+                ['title' => 'Temperature and Humidity Monitoring'],
+                [
+                    'objective' => 'Test the ESP32 integration with the DHT22 sensor.',
+                    'hypothesis' => 'The ESP32 can read temperature and humidity from the DHT22 sensor.',
+                    'procedure' => 'Connect the DHT22 sensor to the ESP32, upload the demo firmware, and record the readings.',
+                    'status' => 'completed',
+                    'notes' => 'Sample experiment for database testing.',
+                ]
+            );
+
+            // 5. Attach components to the experiment.
+            $experiment->components()->sync([
+                $esp32->id => [
+                    'quantity_used' => 1,
+                    'role' => 'Main controller',
+                    'connection_details' => [
+                        'role' => 'Controller',
+                    ],
+                    'notes' => 'Controls the experiment.',
+                ],
+                $sensor->id => [
+                    'quantity_used' => 1,
+                    'role' => 'Environmental sensor',
+                    'connection_details' => [
+                        'data_pin' => 'GPIO 4',
+                        'voltage' => '3.3V',
+                    ],
+                    'notes' => 'Reads temperature and humidity.',
+                ],
+            ]);
+
+            // 6. Create an experiment run.
+            $run = $experiment->runs()->updateOrCreate(
+                ['run_number' => 1],
+                [
+                    'status' => 'completed',
+                    'firmware_version' => '1.0.0',
+                    'firmware_revision' => 'demo-seed-001',
+                    'started_at' => '2026-11-04 09:00:00',
+                    'completed_at' => '2026-11-04 09:05:00',
+                    'environment_conditions' => [
+                        'location' => 'Indoor test bench',
+                        'temperature_c' => 28.5,
+                        'humidity_percent' => 72,
+                    ],
+                    'notes' => 'Demo run generated by ProtoLogSeeder.',
+                ]
+            );
+
+            // 7. Define measurement parameters.
+            $temperature = $experiment->measurementParameters()->updateOrCreate(
+                ['name' => 'Temperature'],
+                [
+                    'source_component_id' => $sensor->id,
+                    'symbol' => 'T',
+                    'unit' => '°C',
+                    'description' => 'Ambient temperature measured by DHT22.',
+                ]
+            );
+
+            $humidity = $experiment->measurementParameters()->updateOrCreate(
+                ['name' => 'Humidity'],
+                [
+                    'source_component_id' => $sensor->id,
+                    'symbol' => 'RH',
+                    'unit' => '%',
+                    'description' => 'Relative humidity measured by DHT22.',
+                ]
+            );
+
+            // 8. Record sample measurements.
+            $run->measurementRecords()->updateOrCreate(
+                [
+                    'measurement_parameter_id' => $temperature->id,
+                    'sample_no' => 1,
+                ],
+                [
+                    'measured_value' => 28.5,
+                    'reference_value' => null,
+                    'measured_at' => '2026-11-04 09:01:00',
+                    'notes' => 'Demo temperature reading.',
+                ]
+            );
+
+            $run->measurementRecords()->updateOrCreate(
+                [
+                    'measurement_parameter_id' => $humidity->id,
+                    'sample_no' => 1,
+                ],
+                [
+                    'measured_value' => 72.0,
+                    'reference_value' => null,
+                    'measured_at' => '2026-11-04 09:01:00',
+                    'notes' => 'Demo humidity reading.',
+                ]
+            );
+
+            // 9. Create the experiment report.
+            $experiment->report()->updateOrCreate(
+                [],
+                [
+                    'summary' => 'The demo experiment recorded temperature and humidity measurements using ESP32 and DHT22.',
+                    'conclusion' => 'The database successfully stores the experiment configuration and measurement records.',
+                    'limitations' => 'The recorded values are sample data, not measurements from a physical test.',
+                    'recommendations' => 'Perform a physical test and compare sensor readings with a reference instrument.',
+                    'generated_at' => '2026-11-04 09:10:00',
+                ]
+            );
+        });
+    }
+}
