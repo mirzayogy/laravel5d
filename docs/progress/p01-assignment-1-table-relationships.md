@@ -1,91 +1,107 @@
-# Progress Report — P01 Database Design
+# P01: Database Design
 
-## Assignment 1: Table Relationships — PenyewaanCamp
+| | |
+|---|---|
+| **Status** | ✅ Done |
+| **Started** | 2026-10-30 |
+| **Completed** | 2026-11-04 |
+| **Branch** | `feature/p01-database-design` |
+| **Pull request** | (add link after creating the PR) |
 
 | | |
 |---|---|
 | **Student** | Maulida Hasanah |
 | **NPM** | 2410010242 |
-| **Class** | Teknik Informatika 5D RegP BJB |
-| **Phase** | P01: Database Design |
-| **Status** | Done (1 November 2026) |
-| **Fork / branch** | https://github.com/maulidahasanah14/laravel5d / `feature/p01-database-design` |
+| **Class** | TI 5D REG BJB |
+| **Assignment** | Assignment 1: Table Relationships (PenyewaanCamp) |
 
-## 1. Tujuan
-Merancang struktur database sistem **PenyewaanCamp** (penyewaan perlengkapan camping) beserta relasi antar tabelnya, lalu mengimplementasikannya dalam migration dan model Eloquent Laravel.
+## Goal
 
-## 2. Entitas
-| Tabel | Fungsi |
-|---|---|
-| `users` | Data pengguna/penyewa (bawaan Laravel) |
-| `kategoris` | Kategori barang (tenda, carrier, alat masak, dll.) |
-| `barangs` | Daftar perlengkapan camping yang bisa disewa |
-| `penyewaans` | Transaksi sewa (header) |
-| `detail_penyewaans` | Rincian barang per transaksi sewa |
-| `pembayarans` | Pembayaran untuk satu transaksi sewa |
+Design the database of PenyewaanCamp (camping equipment rental) with its table relationships, then implement it as Laravel migrations, Eloquent models, and seeders.
 
-## 3. Relasi Antar Tabel
-| Tabel A | Relasi | Tabel B | Foreign key | Aturan hapus |
+## Jobs
+
+| Code | Job | Status | Completed | Proof |
 |---|---|---|---|---|
-| `kategoris` | 1 : N | `barangs` | `barangs.kategori_id` | restrict |
-| `users` | 1 : N | `penyewaans` | `penyewaans.user_id` | restrict |
-| `penyewaans` | 1 : N | `detail_penyewaans` | `detail_penyewaans.penyewaan_id` | cascade |
-| `barangs` | 1 : N | `detail_penyewaans` | `detail_penyewaans.barang_id` | restrict |
-| `penyewaans` | N : N | `barangs` | lewat tabel pivot `detail_penyewaans` | — |
-| `penyewaans` | 1 : 1 | `pembayarans` | `pembayarans.penyewaan_id` (unique) | cascade |
+| J1 | Requirement analysis and entities | ✅ Done | 2026-11-01 | [docs/erd.md](../erd.md) |
+| J2 | ERD (Mermaid) | ✅ Done | 2026-11-01 | [commit 60c9776](https://github.com/maulidahasanah14/laravel5d/commit/60c9776) |
+| J3 | 5 migrations with foreign keys and constraints | ✅ Done | 2026-11-01 | [commit ffaf0e8](https://github.com/maulidahasanah14/laravel5d/commit/ffaf0e8) |
+| J4 | 5 Eloquent models and relationships | ✅ Done | 2026-11-01 | [commit 679da4a](https://github.com/maulidahasanah14/laravel5d/commit/679da4a) |
+| J5 | Progress report and relationship testing in tinker | ✅ Done | 2026-11-01 | [commit c8925b1](https://github.com/maulidahasanah14/laravel5d/commit/c8925b1) |
+| J6 | Has-many-through, seeder, and README fix | ✅ Done | 2026-11-04 | see latest commits on the branch |
 
-ERD lengkap: [docs/erd.md](../erd.md)
+---
 
-## 4. Pekerjaan yang Dilakukan
-| Job | Deskripsi | Status |
-|---|---|---|
-| J1 | Analisis kebutuhan dan penentuan entitas sistem PenyewaanCamp | Done |
-| J2 | Pembuatan ERD (Mermaid) di `docs/erd.md` | Done |
-| J3 | Pembuatan 5 migration beserta foreign key dan constraint | Done |
-| J4 | Pembuatan 5 model Eloquent dan relasi pada model `User` | Done |
-| J5 | Penulisan progress report dan pengujian relasi lewat tinker | Done |
+### Entities
 
-## 5. Keputusan Desain
-- **`detail_penyewaans` sebagai pivot**: relasi many-to-many antara penyewaan dan barang butuh data tambahan (`jumlah`, `harga_satuan`, `subtotal`), jadi dibuat tabel tersendiri.
-- **`harga_satuan` disimpan di detail**: harga sewa barang bisa berubah, tetapi transaksi lama harus tetap memakai harga saat disewa.
-- **Unique `(penyewaan_id, barang_id)`**: satu barang tidak muncul dua kali dalam satu transaksi.
-- **`pembayarans.penyewaan_id` unique**: memastikan relasi satu penyewaan hanya punya satu pembayaran.
-- **`restrictOnDelete` pada user, kategori, dan barang**: data master tidak boleh terhapus jika sudah dipakai transaksi.
+| Table | Purpose |
+|---|---|
+| `users` | Renters (Laravel default) |
+| `kategoris` | Equipment categories (tent, carrier, cooking set, etc.) |
+| `barangs` | Rentable camping equipment |
+| `penyewaans` | Rental transaction (header) |
+| `detail_penyewaans` | Equipment lines per rental (pivot with data) |
+| `pembayarans` | Payment for one rental |
 
-## 6. Cara Menjalankan dan Verifikasi
+### Relationships
+
+| Table A | Type | Table B | Foreign key | On delete |
+|---|---|---|---|---|
+| `kategoris` | 1:N | `barangs` | `barangs.kategori_id` | restrict |
+| `users` | 1:N | `penyewaans` | `penyewaans.user_id` | restrict |
+| `penyewaans` | 1:N | `detail_penyewaans` | `detail_penyewaans.penyewaan_id` | cascade |
+| `barangs` | 1:N | `detail_penyewaans` | `detail_penyewaans.barang_id` | restrict |
+| `penyewaans` | N:N | `barangs` | via pivot `detail_penyewaans` | n/a |
+| `penyewaans` | 1:1 | `pembayarans` | `pembayarans.penyewaan_id` (unique) | cascade |
+| `users` | has-many-through | `detail_penyewaans` | through `penyewaans` | n/a |
+
+### Design decisions
+
+- **`detail_penyewaans` as pivot:** the many-to-many relation needs extra data (`jumlah`, `harga_satuan`, `subtotal`).
+- **`harga_satuan` stored in the detail:** the price can change later, but old transactions must keep the price at rental time.
+- **Unique `(penyewaan_id, barang_id)`:** one item appears only once per rental.
+- **Unique `pembayarans.penyewaan_id`:** one rental has at most one payment.
+- **`restrictOnDelete` on user, category, and item:** master data cannot be deleted once used by a transaction.
+
+### Proof of testing
+
+Output of `php artisan migrate:fresh --seed`:
+
+![migrate](img/migrate.png)
+
+Relationship tests in tinker:
+
+![tinker](img/tinker.png)
+
+![tinker relations](img/tinker-relations.png)
+
+- **Verified:** `User::first()->detailPenyewaans` returns 2 rows, `Penyewaan::first()->barangs` returns 2 items, and `Penyewaan::first()->pembayaran` returns the payment (status `lunas`).
+
+### How to verify
+
 ```bash
 composer install
 cp .env.example .env
 php artisan key:generate
-# atur DB_DATABASE, DB_USERNAME, DB_PASSWORD di .env
-php artisan migrate:fresh
+php artisan migrate:fresh --seed
 php artisan tinker
 ```
 
-Di dalam tinker:
-```php
-$u = App\Models\User::factory()->create();
-$k = App\Models\Kategori::create(['nama_kategori' => 'Tenda']);
-$b = App\Models\Barang::create(['kategori_id' => $k->id, 'nama_barang' => 'Tenda Dome 4P', 'harga_sewa_per_hari' => 50000, 'stok' => 5]);
-$p = App\Models\Penyewaan::create(['user_id' => $u->id, 'tanggal_sewa' => '2026-11-10', 'tanggal_kembali' => '2026-11-12', 'total_harga' => 100000]);
-$p->barangs()->attach($b->id, ['jumlah' => 1, 'harga_satuan' => 50000, 'subtotal' => 100000]);
-$p->pembayaran()->create(['tanggal_bayar' => '2026-11-10', 'jumlah_bayar' => 100000, 'metode' => 'transfer', 'status' => 'lunas']);
+In tinker:
 
-$p->load('user', 'barangs.kategori', 'pembayaran');
-$k->barangs;            // relasi 1:N
-$b->penyewaans;         // relasi N:N
-$p->pembayaran;         // relasi 1:1
+```php
+App\Models\User::first()->detailPenyewaans;
+$p = App\Models\Penyewaan::first();
+$p->barangs;
+$p->pembayaran;
 ```
 
-Hasil yang diharapkan: semua migration sukses, semua relasi mengembalikan data tanpa error.
+## Not done yet
 
-### Bukti hasil (isi dengan screenshot milik sendiri)
-- [ ] Screenshot output `php artisan migrate:fresh`
-- [ ] Screenshot struktur tabel di database (phpMyAdmin/DBeaver/TablePlus)
-- [ ] Screenshot output tinker pemanggilan relasi
+- Controllers, routes, and UI (CRUD is planned for Assignment 2)
+- Authentication, authorization, and input validation
+- Business logic (stock deduction, late fee calculation)
 
-## 7. Belum Dikerjakan
-- Seeder dan factory data dummy untuk tabel selain `users`
-- Controller, route, dan tampilan (UI)
-- Autentikasi, otorisasi, dan validasi input
-- Logika bisnis (pengurangan stok, perhitungan denda keterlambatan)
+## Next
+
+P02: CRUD (Assignment 2).

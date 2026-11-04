@@ -1,93 +1,100 @@
-# Sistem Penyewaan Alat Camping
+# PenyewaanCamp
 
-Sistem Penyewaan Alat Camping adalah aplikasi web manajemen penyewaan alat camping yang dibangun dengan **Laravel**, **Blade**, dan **Tailwind CSS**. Proyek ini difokuskan pada **perancangan database dan relasi antar tabel** menggunakan Eloquent ORM, mulai dari data pelanggan, peralatan, transaksi penyewaan, hingga pengembalian dan denda.
+PenyewaanCamp adalah aplikasi web penyewaan perlengkapan camping yang dibangun dengan **Laravel**, **Blade**, dan **Tailwind CSS**. Fokus tahap ini adalah **perancangan database dan relasi antar tabel** menggunakan Eloquent ORM.
 
 ## Fitur
 
-- Manajemen data pelanggan (nama, alamat, nomor telepon)
-- Manajemen data peralatan camping beserta kategori, stok, dan harga sewa per hari
-- Transaksi penyewaan dengan tanggal sewa dan tanggal kembali rencana
-- Satu transaksi penyewaan dapat memuat banyak jenis peralatan beserta jumlahnya
-- Perhitungan total biaya sewa berdasarkan lama sewa dan harga sewa per hari
-- Pencatatan pengembalian alat dengan tanggal kembali aktual
-- Perhitungan denda apabila pengembalian melebihi tanggal kembali rencana
-- Pengurangan dan penambahan stok peralatan secara otomatis saat disewa dan dikembalikan
+- Pengelompokan barang berdasarkan kategori (tenda, carrier, alat masak, dll.)
+- Data barang beserta stok, harga sewa per hari, dan kondisi
+- Transaksi penyewaan oleh user dengan tanggal sewa dan tanggal kembali
+- Satu penyewaan dapat memuat banyak barang beserta jumlah, harga satuan, dan subtotal
+- Pencatatan pembayaran untuk setiap penyewaan
 
 ## Desain Database
 
-Skema database dan seluruh relasinya didokumentasikan dengan diagram ERD berikut.
-
-![ERD Sistem Penyewaan Alat Camping](docs/database/ERD_sistem_penyewaan_alat_camping.png)
-
-Versi Mermaid dari ERD yang sama:
+ERD lengkap juga tersedia di [docs/erd.md](docs/erd.md).
 
 ```mermaid
 erDiagram
-    PELANGGAN {
-        bigint id_pelanggan PK
-        string nama
-        string alamat
-        string nomor_telepon
-    }
-    PENYEWAAN {
-        bigint nomor_rental PK
-        bigint id_pelanggan FK
-        date tanggal_sewa
-        date tanggal_kembali_rencana
-        decimal total_biaya
-    }
-    PERALATAN {
-        bigint id_peralatan PK
-        string nama_alat
-        string kategori
-        int stok
-        decimal harga_sewa_perhari
-    }
-    DETAIL_PENYEWAAN {
-        bigint nomor_rental PK, FK
-        bigint id_peralatan PK, FK
-        int jumlah
-    }
-    PENGEMBALIAN {
-        bigint nomor_kembali PK
-        bigint nomor_rental FK "unique"
-        date tanggal_kembali_aktual
-        decimal denda
-    }
+    USERS ||--o{ PENYEWAANS : "membuat"
+    KATEGORIS ||--o{ BARANGS : "memiliki"
+    PENYEWAANS ||--|{ DETAIL_PENYEWAANS : "terdiri dari"
+    BARANGS ||--o{ DETAIL_PENYEWAANS : "disewa dalam"
+    PENYEWAANS ||--o| PEMBAYARANS : "dibayar lewat"
 
-    PELANGGAN ||--o{ PENYEWAAN : melakukan
-    PENYEWAAN ||--|{ DETAIL_PENYEWAAN : memuat
-    PERALATAN ||--o{ DETAIL_PENYEWAAN : digunakan
-    PENYEWAAN ||--o| PENGEMBALIAN : "dapat dikembalikan"
+    USERS {
+        bigint id PK
+        string name
+        string email
+    }
+    KATEGORIS {
+        bigint id PK
+        string nama_kategori UK
+        text deskripsi
+    }
+    BARANGS {
+        bigint id PK
+        bigint kategori_id FK
+        string nama_barang
+        decimal harga_sewa_per_hari
+        int stok
+        enum kondisi
+    }
+    PENYEWAANS {
+        bigint id PK
+        bigint user_id FK
+        date tanggal_sewa
+        date tanggal_kembali
+        date tanggal_dikembalikan
+        decimal total_harga
+        enum status
+    }
+    DETAIL_PENYEWAANS {
+        bigint id PK
+        bigint penyewaan_id FK
+        bigint barang_id FK
+        int jumlah
+        decimal harga_satuan
+        decimal subtotal
+    }
+    PEMBAYARANS {
+        bigint id PK
+        bigint penyewaan_id FK,UK
+        date tanggal_bayar
+        decimal jumlah_bayar
+        enum metode
+        enum status
+    }
 ```
 
 ### Struktur Tabel
 
-| Tabel              | Primary Key                       | Foreign Key                      | Atribut Lain                                                      |
-| ------------------ | --------------------------------- | -------------------------------- | ----------------------------------------------------------------- |
-| `pelanggan`        | `id_pelanggan`                    | —                                | `nama`, `alamat`, `nomor_telepon`                                 |
-| `penyewaan`        | `nomor_rental`                    | `id_pelanggan`                   | `tanggal_sewa`, `tanggal_kembali_rencana`, `total_biaya`          |
-| `peralatan`        | `id_peralatan`                    | —                                | `nama_alat`, `kategori`, `stok`, `harga_sewa_perhari`             |
-| `detail_penyewaan` | `nomor_rental` + `id_peralatan`   | `nomor_rental`, `id_peralatan`   | `jumlah`                                                          |
-| `pengembalian`     | `nomor_kembali`                   | `nomor_rental`                   | `tanggal_kembali_aktual`, `denda`                                 |
+| Tabel | Primary Key | Foreign Key | Atribut Lain |
+|---|---|---|---|
+| `users` | `id` | - | `name`, `email`, `password` |
+| `kategoris` | `id` | - | `nama_kategori` (unique), `deskripsi` |
+| `barangs` | `id` | `kategori_id` | `nama_barang`, `harga_sewa_per_hari`, `stok`, `kondisi` |
+| `penyewaans` | `id` | `user_id` | `tanggal_sewa`, `tanggal_kembali`, `tanggal_dikembalikan`, `total_harga`, `status` |
+| `detail_penyewaans` | `id` | `penyewaan_id`, `barang_id` | `jumlah`, `harga_satuan`, `subtotal` |
+| `pembayarans` | `id` | `penyewaan_id` (unique) | `tanggal_bayar`, `jumlah_bayar`, `metode`, `status` |
 
 ### Relasi yang Tercakup
 
-| Tipe                          | Contoh                                                                                                    |
-| ----------------------------- | --------------------------------------------------------------------------------------------------------- |
-| One-to-One (opsional, 1 ke 0..1) | `Penyewaan` ↔ `Pengembalian`                                                                           |
-| One-to-Many                   | `Pelanggan` → `Penyewaan`, `Penyewaan` → `DetailPenyewaan`, `Peralatan` → `DetailPenyewaan`               |
-| Many-to-Many with pivot data  | `Penyewaan` ↔ `Peralatan` melalui `detail_penyewaan` (`jumlah`)                                           |
-| Has-Many-Through              | `Pelanggan` → `DetailPenyewaan` melalui `Penyewaan`                                                       |
+| Tipe | Contoh |
+|---|---|
+| One-to-One | `Penyewaan` ↔ `Pembayaran` |
+| One-to-Many | `Kategori` → `Barang`, `User` → `Penyewaan`, `Penyewaan` → `DetailPenyewaan` |
+| Many-to-Many dengan pivot | `Penyewaan` ↔ `Barang` melalui `detail_penyewaans` (`jumlah`, `harga_satuan`, `subtotal`) |
+| Has-Many-Through | `User` → `DetailPenyewaan` melalui `Penyewaan` |
 
 ### Aturan Bisnis
 
-- Satu pelanggan dapat melakukan banyak penyewaan, tetapi setiap penyewaan hanya dimiliki satu pelanggan.
-- Satu penyewaan dapat memuat banyak peralatan, dan satu peralatan dapat muncul di banyak penyewaan (relasi many-to-many melalui `detail_penyewaan`).
-- Setiap penyewaan memiliki paling banyak satu data pengembalian (`0..1`); penyewaan tanpa pengembalian berarti alat belum dikembalikan.
-- `jumlah` yang disewa tidak boleh melebihi `stok` peralatan yang tersedia.
-- `total_biaya` = jumlah dari (`jumlah` × `harga_sewa_perhari` × lama sewa) untuk setiap peralatan dalam penyewaan.
-- `denda` dikenakan jika `tanggal_kembali_aktual` lebih besar dari `tanggal_kembali_rencana`.
+- Satu user dapat membuat banyak penyewaan, tetapi setiap penyewaan dimiliki satu user.
+- Satu penyewaan memuat banyak barang, dan satu barang dapat muncul di banyak penyewaan.
+- Satu barang hanya muncul satu kali dalam satu penyewaan (unique `penyewaan_id` + `barang_id`).
+- Setiap penyewaan memiliki paling banyak satu pembayaran.
+- `harga_satuan` disimpan di detail agar perubahan harga barang tidak mengubah transaksi lama.
+- Data kategori, barang, dan user tidak dapat dihapus jika sudah dipakai transaksi (`restrictOnDelete`).
 
 ## Tech Stack
 
@@ -99,22 +106,13 @@ erDiagram
 ## Cara Menjalankan
 
 ```bash
-# Clone repository
 git clone https://github.com/maulidahasanah14/laravel5d
 cd laravel5d
-
-# Install dependensi
 composer install
 npm install
-
-# Konfigurasi environment
 cp .env.example .env
 php artisan key:generate
-
-# Buat skema database
-php artisan migrate --seed
-
-# Jalankan development server
+php artisan migrate:fresh --seed
 npm run dev
 php artisan serve
 ```
@@ -127,26 +125,24 @@ Kemudian buka <http://localhost:8000>.
 app/Models/        Model Eloquent dan relasinya
 database/
   migrations/      Definisi tabel
-  factories/       Generator data dummy
-  seeders/         Data awal peralatan dan contoh data
-resources/views/   Template Blade
+  seeders/         Data contoh
 docs/
-  database/        ERD dan dokumentasi relasi
+  erd.md           ERD sistem
+  progress/        Laporan progres per fase
+resources/views/   Template Blade
 ```
 
 ## Roadmap
 
 - [x] Perancangan dan dokumentasi database (ERD)
-- [ ] Migration, model, factory, dan seeder
-- [ ] CRUD pelanggan
-- [ ] CRUD peralatan dan manajemen stok
-- [ ] Transaksi penyewaan dan detail penyewaan
-- [ ] Pengembalian dan perhitungan denda
-- [ ] Laporan penyewaan
+- [x] Migration, model, relasi, dan seeder
+- [ ] CRUD (Assignment 2)
+- [ ] Transaksi penyewaan di antarmuka
+- [ ] Perhitungan denda keterlambatan
 
 ## Penulis
 
-Maulida Hasanah — NPM <2410010242>
+Maulida Hasanah - NPM 2410010242
 
 ## Lisensi
 
