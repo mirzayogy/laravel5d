@@ -2,11 +2,13 @@
     "$schema": "https://getcomposer.org/schema.json",
     "name": "laravel/laravel",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "description": "Habitude, a habit tracker built with Laravel, Blade and Tailwind CSS.",
+    "keywords": ["laravel", "habit-tracker", "habitude"],
     "license": "MIT",
     "require": {
         "php": "^8.3",
+        "dicebear/core": "^10.7",
+        "dicebear/styles": "^10.6",
         "laravel/framework": "^13.17",
         "laravel/tinker": "^3.0"
     },

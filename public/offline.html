@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#ff5900">
+    <title>Offline · Habitude</title>
+    <style>
+        :root { color-scheme: light; }
+        body { margin: 0; min-height: 100svh; display: grid; place-items: center; padding: 24px; background: #f3f3f7; color: #000; font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; letter-spacing: -0.01em; }
+        main { max-width: 22rem; text-align: center; }
+        .mark { width: 72px; height: 72px; margin: 0 auto 24px; border-radius: 22px; background: #ff5900; display: grid; place-items: center; }
+        h1 { margin: 0 0 8px; font-size: 24px; letter-spacing: -0.02em; }
+        p { margin: 0 0 24px; color: #60646c; font-size: 15px; line-height: 1.5; }
+        button { padding: 10px 18px; border: 0; border-radius: 12px; background: #ff5900; color: #fff; font: inherit; font-weight: 600; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <main>
+        <div class="mark" aria-hidden="true">
+            <svg width="40" height="48" viewBox="0 0 40 48" fill="#fff"><path d="M18.5 19V4L21.5 4V19H18.5Z"/><path d="M18.5 44V29H21.5V44H18.5Z"/><path d="M22.4754 19.404L33.082 8.79736L35.2034 10.9187L26.7181 19.404L22.4754 19.404Z"/><path d="M4.79776 37.0816L15.4044 26.475L17.5257 28.5964L6.91908 39.203L4.79776 37.0816Z"/><path d="M26.7178 28.5963L35.2031 37.0815L33.0818 39.2029L22.4752 28.5963H26.7178Z"/><path d="M6.91885 8.79727L17.5255 19.4039L15.4041 21.5252L4.79753 10.9186L6.91885 8.79727Z"/><path d="M18.5 22.5L40 22.5V25.5L18.5 25.5V22.5Z"/><path d="M2.62269e-07 22.5L15 22.5V25.5L0 25.5L2.62269e-07 22.5Z"/></svg>
+        </div>
+        <h1>You are offline</h1>
+        <p>Habitude needs a connection to load your habits. Your streak is safe. Reconnect and try again.</p>
+        <button type="button" onclick="location.reload()">Try again</button>
+    </main>
+</body>
+</html>
