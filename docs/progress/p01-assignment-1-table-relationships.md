@@ -6,7 +6,7 @@
 | **Started** | 2026-10-30 |
 | **Completed** | 2026-11-04 |
 | **Branch** | `feature/p01-database-design` |
-| **Pull request** | (add link after creating the PR) |
+| **Pull request** | [#56](https://github.com/mirzayogy/laravel5d/pull/56) |
 
 | | |
 |---|---|
@@ -28,7 +28,7 @@ Design the database of PenyewaanCamp (camping equipment rental) with its table r
 | J3 | 5 migrations with foreign keys and constraints | ✅ Done | 2026-11-01 | [commit ffaf0e8](https://github.com/maulidahasanah14/laravel5d/commit/ffaf0e8) |
 | J4 | 5 Eloquent models and relationships | ✅ Done | 2026-11-01 | [commit 679da4a](https://github.com/maulidahasanah14/laravel5d/commit/679da4a) |
 | J5 | Progress report and relationship testing in tinker | ✅ Done | 2026-11-01 | [commit c8925b1](https://github.com/maulidahasanah14/laravel5d/commit/c8925b1) |
-| J6 | Has-many-through, seeder, and README fix | ✅ Done | 2026-11-04 | see latest commits on the branch |
+| J6 | Has-many-through, seeder, and README fix | ✅ Done | 2026-11-04 | [commit d253f48](https://github.com/maulidahasanah14/laravel5d/commit/d253f48) |
 
 ---
 
