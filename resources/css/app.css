@@ -4,6 +4,103 @@
 @source '../../storage/framework/views/*.php';
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans',
+        sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji';
+
+    --color-brand-50: #fbf6ef;
+    --color-brand-100: #f5e9d6;
+    --color-brand-200: #ead0a9;
+    --color-brand-300: #dcb177;
+    --color-brand-400: #cd9149;
+    --color-brand-500: #b9742f;
+    --color-brand-600: #9c5b25;
+    --color-brand-700: #7d4620;
+    --color-brand-800: #66391f;
+    --color-brand-900: #55311d;
+}
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        -webkit-font-smoothing: antialiased;
+    }
+}
+
+@layer components {
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 disabled:cursor-not-allowed disabled:opacity-50;
+    }
+    .btn-primary {
+        @apply bg-brand-600 text-white shadow-sm hover:bg-brand-700 active:scale-[.98];
+    }
+    .btn-ghost {
+        @apply border border-stone-200 bg-white text-stone-700 hover:bg-stone-50;
+    }
+    .btn-danger {
+        @apply border border-red-200 bg-white text-red-600 hover:bg-red-50;
+    }
+    .btn-sm {
+        @apply rounded-lg px-3 py-1.5 text-xs;
+    }
+
+    .input {
+        @apply w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-sm text-stone-800 placeholder:text-stone-400 focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-100;
+    }
+    .label {
+        @apply mb-1.5 block text-sm font-medium text-stone-700;
+    }
+
+    .card {
+        @apply rounded-2xl border border-stone-200 bg-white shadow-sm;
+    }
+
+    .chip {
+        @apply inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border border-stone-200 bg-white px-3.5 py-1.5 text-sm text-stone-600 transition hover:border-brand-300 hover:text-brand-700;
+    }
+    .chip-active {
+        @apply border-brand-600 bg-brand-600 text-white hover:border-brand-600 hover:text-white;
+    }
+
+    .th {
+        @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-stone-500;
+    }
+    .td {
+        @apply px-4 py-3 align-middle;
+    }
+
+    .badge {
+        @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium capitalize;
+    }
+}
+
+@keyframes rise {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.rise {
+    animation: rise 0.35s ease-out both;
+}
+
+dialog::backdrop {
+    background: rgb(28 25 23 / 0.45);
+    backdrop-filter: blur(2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rise {
+        animation: none;
+    }
+    html {
+        scroll-behavior: auto;
+    }
 }
