@@ -1,58 +1,125 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Kost Area: Platform Manajemen dan Booking Kos
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Kost Area adalah aplikasi web manajemen dan booking kos yang dibangun dengan **Laravel** dan **Blade**. Proyek ini merupakan tugas mata kuliah **PBO2**, dengan fokus pada perancangan dan implementasi **relasi antar tabel database** menggunakan Eloquent ORM. Studi kasusnya: satu pemilik mengelola dua kost, **Kost Area Putra** dan **Kost Area Putri**.
 
-## About Laravel
+## Fitur yang Sudah Ada
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Pemilik dapat memiliki lebih dari satu kost
+- Kost khusus putra atau khusus putri (tidak ada kost campur)
+- Kamar dengan lantai, ukuran, harga sewa harian, harga sewa bulanan, dan status (`available`, `occupied`, `maintenance`)
+- Fasilitas kamar (AC, WiFi, kamar mandi dalam, kasur, lemari) yang dipakai bersama oleh banyak kamar
+- Data penyewa beserta jenis kelamin
+- Booking kamar dengan sewa harian atau bulanan; tarif saat booking disimpan sehingga perubahan harga tidak memengaruhi booking lama
+- Perpanjangan sewa (booking menunjuk booking sebelumnya), waktu check-in dan check-out
+- Pembayaran bertipe deposit, sewa, denda, dan pengembalian deposit, dengan jatuh tempo
+- Metode bayar tunai, transfer, atau QRIS, dengan bukti bayar dan verifikasi oleh pemilik
+- Status pembayaran: Belum Dibayar, Menunggu Verifikasi, Lunas, dan Terlambat
+- Halaman web untuk menampilkan data: Dashboard, Kost, Kamar, Fasilitas, Penyewa, Booking, dan Pembayaran
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Desain Database
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Diagram ERD lengkap (semua tabel dan kolom, termasuk yang masih rencana), tabel status implementasi, dan penjelasan relasi ada di [`docs/erd.md`](docs/erd.md).
 
-## Learning Laravel
+### Relasi yang Dicakup
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+| Jenis | Contoh |
+|---|---|
+| One-to-Many | `User` → `Kost`, `Kost` → `Room`, `Room` → `Booking`, `Tenant` → `Booking`, `Booking` → `Payment`, `User` (verifikator) → `Payment` |
+| Many-to-Many | `Room` ↔ `Facility` (tabel pivot `facility_room`) |
+| Self-referencing | `Booking` → `Booking` lewat `previous_booking_id` (perpanjangan sewa) |
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Aturan Bisnis
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+- Jenis kost (`kosts.type`) hanya `putra` atau `putri`. Semua kamar di sebuah kost mengikuti jenis kost-nya.
+- Jenis kelamin penyewa (`tenants.gender`) dicatat agar penyewa hanya memesan kost yang sesuai. Data contoh sudah mengikuti aturan ini. Pemeriksaan otomatis saat membuat booking menyusul bersama form booking.
+- `room_number` unik di dalam satu kost. `tenants.id_number` dan `facilities.name` unik.
+- Satu kamar dapat dipesan berkali-kali pada periode berbeda. Satu penyewa dapat memiliki banyak booking.
+- `bookings.rental_type` adalah `daily` atau `monthly`. `duration` dihitung dalam hari untuk `daily` dan bulan untuk `monthly`.
+- Saat booking dibuat, tarif kamar disalin ke `bookings.price_per_unit`, lalu `total_price` = `price_per_unit` x `duration` dan `end_date` = `start_date` + `duration`.
+- Sewa bulanan: ada satu pembayaran `deposit` dan satu pembayaran `rent` per bulan, masing-masing dengan `due_date` sendiri.
+- Sewa harian: tanpa deposit (`deposit_amount` = 0), dan hanya satu pembayaran `rent` senilai `total_price`.
+- Untuk transfer dan QRIS, penyewa mengunggah bukti bayar sehingga status menjadi `waiting_verification`. Setelah diverifikasi pemilik (`verified_by`), status menjadi `paid`. Pembayaran tunai dapat langsung dicatat `paid` oleh pemilik.
+- Pembayaran `unpaid` yang melewati `due_date` berstatus `overdue`. Denda keterlambatan dicatat sebagai pembayaran bertipe `late_fee`.
+- Pengembalian deposit dicatat sebagai pembayaran bertipe `refund`. Jika dipotong, alasannya dicatat di `payments.notes`.
+- Perpanjangan sewa dibuat sebagai booking baru dengan `previous_booking_id` menunjuk booking sebelumnya.
+- Semua foreign key memakai `cascadeOnDelete`, kecuali `previous_booking_id` dan `verified_by` yang menjadi `null` saat induknya dihapus.
 
-## Agentic Development
+Catatan: aturan seperti pembatalan otomatis booking yang tidak dibayar, penagihan otomatis, dan penandaan keterlambatan baru berupa rancangan struktur data. Prosesnya belum diprogram dan dikerjakan di tahap berikutnya.
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Teknologi yang Digunakan
+
+- PHP 8.3+ dan Laravel
+- Template Blade
+- MySQL atau SQLite
+
+## Memulai
 
 ```bash
-composer require laravel/boost --dev
+# Clone repository
+git clone https://github.com/Luchyana-Desi/laravel5d
+cd laravel5d
 
-php artisan boost:install
+# Install dependensi
+composer install
+
+# Atur environment
+cp .env.example .env
+php artisan key:generate
+
+# Buat skema database dan isi data contoh
+php artisan migrate:fresh --seed
+
+# Jalankan server pengembangan
+php artisan serve
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Lalu buka <http://localhost:8000>.
 
-## Contributing
+Seeder (`KostAreaSeeder`) mengisi data contoh: 1 pemilik, 5 fasilitas, 2 kost (putra dan putri), 10 kamar, 6 penyewa (sesuai jenis kost), 6 booking (4 bulanan, 2 harian), dan 20 pembayaran dengan berbagai status.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Halaman yang Tersedia
 
-## Code of Conduct
+| Alamat | Isi |
+|---|---|
+| `/` | Dashboard ringkasan |
+| `/kosts`, `/kosts/{id}` | Daftar dan detail kost |
+| `/rooms`, `/rooms/{id}` | Daftar dan detail kamar |
+| `/facilities`, `/facilities/{id}` | Daftar dan detail fasilitas |
+| `/tenants`, `/tenants/{id}` | Daftar dan detail penyewa |
+| `/bookings`, `/bookings/{id}` | Daftar dan detail booking |
+| `/payments`, `/payments/{id}` | Daftar dan detail pembayaran |
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Struktur Proyek
 
-## Security Vulnerabilities
+```
+app/Http/Controllers/   Controller (menampilkan data)
+app/Models/             Model Eloquent dan relasinya
+database/
+  migrations/           Definisi tabel
+  factories/            Pembuat data contoh
+  seeders/              KostAreaSeeder dan DatabaseSeeder
+resources/views/        Template Blade (layout, dashboard, dan halaman per tabel)
+routes/web.php          Daftar route
+docs/
+  erd.md                Dokumentasi ERD dan relasi
+  progress/             Laporan progres per fase
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Roadmap
 
-## License
+- [x] Desain dan dokumentasi database
+- [x] Migration, model, factory, dan seeder
+- [x] Controller, route, dan tampilan data (Assignment 1)
+- [ ] CRUD dengan template AdminLTE (Assignment 2)
+- [ ] Fasilitas kost dan foto (kost, kamar)
+- [ ] Laporan kerusakan
+- [ ] Profil penghuni, autentikasi, dan akses berbasis peran
+- [ ] Proses otomatis: pembatalan booking, penagihan, dan penandaan pembayaran terlambat
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Penulis
+
+Luchyana Desi Safitri, NPM 2410010230
+
+## Lisensi
+
+Dirilis di bawah [Lisensi MIT](https://opensource.org/licenses/MIT).
