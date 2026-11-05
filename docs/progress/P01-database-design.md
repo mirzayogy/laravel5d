@@ -24,6 +24,7 @@ Design and implement the database of **Toko Online Mini** with Eloquent relation
 | J6 | README | ✅ Done | 2026-11-04 | [README.md](https://github.com/nrhyti/laravel5d/blob/feature/p01-database-design/README.md), [commit 72a955a](https://github.com/nrhyti/laravel5d/commit/72a955a) |
 | J7 | Factories | ✅ Done | 2026-11-04 | [factories](https://github.com/nrhyti/laravel5d/tree/feature/p01-database-design/database/factories), [commit edf2070](https://github.com/nrhyti/laravel5d/commit/edf2070) |
 | J8 | Read-only pages (dashboard, products, orders) | ✅ Done | 2026-11-04 | [views](https://github.com/nrhyti/laravel5d/tree/feature/p01-database-design/resources/views), [commit b5de33b](https://github.com/nrhyti/laravel5d/commit/b5de33b) |
+| J9 | Improved layout and styling (sidebar, colored cards and badges) | ✅ Done | 2026-11-05 | [views](https://github.com/nrhyti/laravel5d/tree/feature/p01-database-design/resources/views), [commit 47782ca](https://github.com/nrhyti/laravel5d/commit/47782ca) |
 
 **Status legend:** ⏳ Planned · 🚧 In progress · ✅ Done · ⛔ Blocked
 
@@ -109,6 +110,12 @@ Design and implement the database of **Toko Online Mini** with Eloquent relation
 ![products](img/view-produk.png)
 
 ![orders](img/view-pesanan.png)
+
+### J9: Improved layout and styling
+
+- **Status:** ✅ Done, 2026-11-05
+- **What:** Restyled `layouts/app.blade.php` and the three pages with a sidebar layout, a top bar, colored statistic cards, colored category and status badges, and a low-stock indicator. It uses plain CSS only, so no build step is needed. The screenshots in J8 were retaken with the new design.
+- **Proof:** [views](https://github.com/nrhyti/laravel5d/tree/feature/p01-database-design/resources/views), [commit 47782ca](https://github.com/nrhyti/laravel5d/commit/47782ca)
 
 ---
 
