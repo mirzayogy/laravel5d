@@ -1,0 +1,51 @@
+<?php
+
+// Indonesian messages for the rules used in this app. Missing rules fall back to English.
+return [
+    'after_or_equal' => ':Attribute harus berupa tanggal setelah atau sama dengan :date.',
+    'array' => ':Attribute harus berupa array.',
+    'boolean' => ':Attribute harus bernilai benar atau salah.',
+    'confirmed' => 'Konfirmasi :attribute tidak cocok.',
+    'date' => ':Attribute bukan tanggal yang valid.',
+    'email' => ':Attribute harus berupa alamat email yang valid.',
+    'exists' => ':Attribute yang dipilih tidak valid.',
+    'image' => ':Attribute harus berupa gambar.',
+    'in' => ':Attribute yang dipilih tidak valid.',
+    'integer' => ':Attribute harus berupa bilangan bulat.',
+    'max' => [
+        'array' => ':Attribute tidak boleh lebih dari :max item.',
+        'file' => 'Ukuran :attribute tidak boleh lebih dari :max kilobita.',
+        'numeric' => ':Attribute tidak boleh lebih besar dari :max.',
+        'string' => ':Attribute tidak boleh lebih dari :max karakter.',
+    ],
+    'mimes' => ':Attribute harus berupa berkas bertipe: :values.',
+    'min' => [
+        'array' => ':Attribute minimal berisi :min item.',
+        'file' => 'Ukuran :attribute minimal :min kilobita.',
+        'numeric' => ':Attribute minimal :min.',
+        'string' => ':Attribute minimal :min karakter.',
+    ],
+    'required' => ':Attribute wajib diisi.',
+    'string' => ':Attribute harus berupa teks.',
+    'unique' => ':Attribute sudah digunakan.',
+
+    'attributes' => [
+        'name' => 'nama',
+        'email' => 'email',
+        'password' => 'password',
+        'phone' => 'telepon',
+        'address' => 'alamat',
+        'role' => 'peran',
+        'price' => 'harga',
+        'stock' => 'stok',
+        'image' => 'foto',
+        'category_id' => 'kategori',
+        'description' => 'deskripsi',
+        'items' => 'menu',
+        'note' => 'catatan',
+        'table_number' => 'nomor meja',
+        'payment_method' => 'metode pembayaran',
+        'from' => 'tanggal awal',
+        'to' => 'tanggal akhir',
+    ],
+];
