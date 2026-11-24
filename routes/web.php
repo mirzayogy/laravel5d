@@ -16,3 +16,4 @@ Route::view('/tables', 'tables')->name('tables');
 Route::view('/edit', 'edit')->name('edit');
 
 Route::resource('periode', PeriodeController::class);
+Route::get('/laporan/periode', [PeriodeController::class, 'cetak'])->name('laporan.periode');

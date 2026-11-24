@@ -71,6 +71,15 @@
                         </li>
                     </ul>
                 </li>
+
+
+                <li class="nav-header">LAPORAN</li>
+                <li class="nav-item">
+                    <a href="{{ route('laporan.periode') }}" target="_blank" class="nav-link">
+                        <i class="nav-icon bi bi-file-earmark-pdf"></i>
+                        <p>Laporan Periode</p>
+                    </a>
+                </li>
             </ul>
             <!--end::Sidebar Menu-->
 

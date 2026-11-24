@@ -34,6 +34,10 @@
                         </div>
                         <div class="col-12 col-md-8">
                             <div class="d-flex flex-wrap justify-content-md-end gap-2">
+                                <a href="{{ route('laporan.periode') }}" target="_blank" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-file-earmark-pdf me-1" aria-hidden="true"></i>
+                                    Cetak PDF
+                                </a>
                                 <a href="{{ route('periode.create') }}" class="btn btn-sm btn-success">
                                     <i class="bi bi-plus-circle me-1" aria-hidden="true"></i>
                                     Tambah Data
